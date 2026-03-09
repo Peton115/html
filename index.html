@@ -1,1280 +1,1303 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>sou1crush | Portfolio Generator Pro</title>
-
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Font Awesome -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
-
-<!-- Stripe -->
-<script src="https://js.stripe.com/v3/"></script>
-
-<style>
-:root {
---primary: #0a0a0a;
---surface: #111111;
---surface-elevated: #1a1a1a;
---accent: #00d4ff;
---accent-secondary: #ff006e;
---success: #00ff88;
---warning: #ffd700;
---text: #ffffff;
---text-muted: #888888;
---border: rgba(255, 255, 255, 0.1);
-}
-
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
--webkit-tap-highlight-color: transparent;
-}
-
-body {
-font-family: 'Inter', sans-serif;
-background: var(--primary);
-color: var(--text);
-min-height: 100vh;
-overflow-x: hidden;
-}
-
-/* Background */
-.mesh-bg {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-z-index: -2;
-background:
-radial-gradient(at 0% 0%, rgba(0, 212, 255, 0.05) 0, transparent 50%),
-radial-gradient(at 100% 0%, rgba(255, 0, 110, 0.05) 0, transparent 50%),
-#050505;
-}
-
-.noise {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-opacity: 0.015;
-z-index: -1;
-pointer-events: none;
-background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
-
-/* Modern Components */
-.card {
-background: rgba(17, 17, 17, 0.8);
-backdrop-filter: blur(20px);
-border: 1px solid var(--border);
-border-radius: 16px;
-transition: all 0.3s ease;
-}
-
-.card:hover {
-border-color: rgba(255, 255, 255, 0.15);
-}
-
-/* Clean Buttons - No Spin */
-.btn {
-display: inline-flex;
-align-items: center;
-justify-content: center;
-gap: 8px;
-padding: 12px 24px;
-background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-border: 1px solid rgba(255, 255, 255, 0.1);
-border-radius: 12px;
-color: white;
-font-size: 14px;
-font-weight: 500;
-cursor: pointer;
-transition: all 0.2s ease;
-}
-
-.btn:hover {
-background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08));
-border-color: rgba(255, 255, 255, 0.2);
-transform: translateY(-1px);
-}
-
-.btn:active {
-transform: translateY(0) scale(0.98);
-}
-
-.btn-primary {
-background: linear-gradient(135deg, var(--accent), #0099cc);
-border-color: transparent;
-color: black;
-font-weight: 600;
-}
-
-.btn-primary:hover {
-background: linear-gradient(135deg, #33ddff, #00b3e6);
-box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
-}
-
-.btn-secondary {
-background: transparent;
-border-color: rgba(255, 255, 255, 0.2);
-}
-
-.btn-gold {
-background: linear-gradient(135deg, #ffd700, #ffaa00);
-border-color: transparent;
-color: black;
-font-weight: 600;
-}
-
-.btn-gold:hover {
-box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
-}
-
-.btn:disabled {
-opacity: 0.5;
-cursor: not-allowed;
-transform: none;
-}
-
-/* Inputs */
-.input {
-width: 100%;
-padding: 14px 16px;
-background: rgba(255, 255, 255, 0.03);
-border: 1px solid rgba(255, 255, 255, 0.1);
-border-radius: 12px;
-color: white;
-font-size: 14px;
-transition: all 0.3s;
-}
-
-.input:focus {
-outline: none;
-border-color: var(--accent);
-background: rgba(255, 255, 255, 0.05);
-}
-
-.input::placeholder {
-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Toggle */
-.toggle {
-appearance: none;
-width: 48px;
-height: 26px;
-background: rgba(255, 255, 255, 0.1);
-border-radius: 13px;
-position: relative;
-cursor: pointer;
-transition: all 0.3s;
-}
-
-.toggle::after {
-content: '';
-position: absolute;
-width: 20px;
-height: 20px;
-background: white;
-border-radius: 50%;
-top: 3px;
-left: 3px;
-transition: transform 0.3s;
-box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
-
-.toggle:checked {
-background: var(--accent);
-}
-
-.toggle:checked::after {
-transform: translateX(22px);
-}
-
-/* Tabs */
-.tab {
-position: relative;
-padding: 12px 16px;
-font-size: 13px;
-font-weight: 500;
-color: var(--text-muted);
-cursor: pointer;
-transition: all 0.3s;
-border: none;
-background: none;
-}
-
-.tab::after {
-content: '';
-position: absolute;
-bottom: 0;
-left: 50%;
-transform: translateX(-50%);
-width: 0;
-height: 2px;
-background: var(--accent);
-transition: width 0.3s;
-border-radius: 2px;
-}
-
-.tab.active {
-color: var(--accent);
-}
-
-.tab.active::after {
-width: 50%;
-}
-
-/* Pages */
-.page {
-display: none;
-animation: fadeIn 0.4s ease;
-}
-
-.page.active {
-display: block;
-}
-
-@keyframes fadeIn {
-from { opacity: 0; transform: translateY(10px); }
-to { opacity: 1; transform: translateY(0); }
-}
-
-/* Toast */
-.toast {
-position: fixed;
-bottom: 100px;
-left: 50%;
-transform: translateX(-50%) translateY(20px);
-background: rgba(0, 0, 0, 0.95);
-border: 1px solid rgba(255, 255, 255, 0.1);
-padding: 16px 28px;
-border-radius: 12px;
-font-size: 14px;
-opacity: 0;
-transition: all 0.3s ease;
-z-index: 10000;
-backdrop-filter: blur(10px);
-}
-
-.toast.show {
-opacity: 1;
-transform: translateX(-50%) translateY(0);
-}
-
-/* Modal */
-.modal-overlay {
-position: fixed;
-inset: 0;
-background: rgba(0, 0, 0, 0.8);
-backdrop-filter: blur(10px);
-z-index: 9999;
-display: none;
-align-items: center;
-justify-content: center;
-padding: 20px;
-}
-
-.modal-overlay.active {
-display: flex;
-}
-
-.modal {
-background: var(--surface);
-border: 1px solid var(--border);
-border-radius: 24px;
-width: 100%;
-max-width: 420px;
-max-height: 90vh;
-overflow-y: auto;
-animation: modalEnter 0.3s ease;
-}
-
-@keyframes modalEnter {
-from { opacity: 0; transform: scale(0.95); }
-to { opacity: 1; transform: scale(1); }
-}
-
-/* Premium Badge */
-.badge-premium {
-display: inline-flex;
-align-items: center;
-gap: 4px;
-padding: 4px 10px;
-background: linear-gradient(135deg, #ffd700, #ffaa00);
-color: black;
-font-size: 10px;
-font-weight: 700;
-border-radius: 20px;
-text-transform: uppercase;
-letter-spacing: 0.5px;
-}
-
-.badge-pro {
-display: inline-flex;
-align-items: center;
-gap: 4px;
-padding: 4px 10px;
-background: linear-gradient(135deg, var(--accent), #0099cc);
-color: black;
-font-size: 10px;
-font-weight: 700;
-border-radius: 20px;
-text-transform: uppercase;
-letter-spacing: 0.5px;
-}
-
-/* Chat */
-.chat-message {
-max-width: 80%;
-padding: 12px 16px;
-border-radius: 16px;
-margin-bottom: 8px;
-font-size: 14px;
-line-height: 1.5;
-}
-
-.chat-message.sent {
-background: var(--accent);
-color: black;
-margin-left: auto;
-border-bottom-right-radius: 4px;
-}
-
-.chat-message.received {
-background: rgba(255, 255, 255, 0.1);
-margin-right: auto;
-border-bottom-left-radius: 4px;
-}
-
-.chat-time {
-font-size: 11px;
-opacity: 0.6;
-margin-top: 4px;
-}
-
-/* Online Indicator */
-.online-indicator {
-width: 8px;
-height: 8px;
-background: var(--success);
-border-radius: 50%;
-box-shadow: 0 0 8px var(--success);
-}
-
-.online-indicator.offline {
-background: var(--text-muted);
-box-shadow: none;
-}
-
-/* Theme Cards */
-.theme-card {
-aspect-ratio: 16/10;
-border-radius: 12px;
-border: 2px solid transparent;
-cursor: pointer;
-transition: all 0.3s;
-position: relative;
-overflow: hidden;
-}
-
-.theme-card:hover {
-transform: translateY(-2px);
-}
-
-.theme-card.selected {
-border-color: var(--accent);
-}
-
-.theme-card.selected::after {
-content: '✓';
-position: absolute;
-top: 8px;
-right: 8px;
-width: 24px;
-height: 24px;
-background: var(--accent);
-color: black;
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 14px;
-font-weight: bold;
-}
-
-/* Feature Row */
-.feature-row {
-display: flex;
-align-items: center;
-justify-content: space-between;
-padding: 16px;
-background: rgba(255, 255, 255, 0.02);
-border-radius: 12px;
-margin-bottom: 12px;
-border: 1px solid transparent;
-transition: all 0.3s;
-}
-
-.feature-row:hover {
-background: rgba(255, 255, 255, 0.04);
-border-color: rgba(255, 255, 255, 0.1);
-}
-
-.feature-row.locked {
-opacity: 0.5;
-}
-
-/* Code Block */
-.code-block {
-background: #0a0a0a;
-border: 1px solid var(--border);
-border-radius: 12px;
-padding: 16px;
-font-family: 'JetBrains Mono', monospace;
-font-size: 12px;
-line-height: 1.6;
-overflow-x: auto;
-max-height: 300px;
-overflow-y: auto;
-}
-
-/* Preview Frame */
-.preview-frame {
-width: 100%;
-height: 400px;
-border: 1px solid var(--border);
-border-radius: 16px;
-background: white;
-}
-
-/* Loading */
-.loader {
-position: fixed;
-inset: 0;
-background: #000;
-z-index: 100000;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-transition: opacity 0.5s;
-}
-
-.loader.hidden {
-opacity: 0;
-pointer-events: none;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-width: 6px;
-height: 6px;
-}
-::-webkit-scrollbar-track {
-background: transparent;
-}
-::-webkit-scrollbar-thumb {
-background: rgba(255, 255, 255, 0.1);
-border-radius: 3px;
-}
-
-/* Status Dot */
-.status-dot {
-width: 8px;
-height: 8px;
-background: var(--success);
-border-radius: 50%;
-box-shadow: 0 0 8px var(--success);
-}
-
-/* Watermark */
-.watermark {
-position: fixed;
-bottom: 80px;
-right: 20px;
-font-size: 12px;
-color: rgba(255, 255, 255, 0.3);
-pointer-events: none;
-}
-
-.watermark.hidden {
-display: none;
-}
-
-/* Analytics Card */
-.stat-card {
-background: rgba(255, 255, 255, 0.03);
-border: 1px solid rgba(255, 255, 255, 0.1);
-border-radius: 12px;
-padding: 20px;
-text-align: center;
-}
-
-.stat-value {
-font-size: 32px;
-font-weight: 700;
-background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-}
-
-/* Visitor Counter */
-.visitor-counter {
-display: inline-flex;
-align-items: center;
-gap: 8px;
-padding: 8px 16px;
-background: rgba(0, 255, 136, 0.1);
-border: 1px solid rgba(0, 255, 136, 0.2);
-border-radius: 20px;
-font-size: 13px;
-color: var(--success);
-}
-
-/* Guestbook Entry */
-.guestbook-entry {
-background: rgba(255, 255, 255, 0.03);
-border: 1px solid rgba(255, 255, 255, 0.1);
-border-radius: 12px;
-padding: 16px;
-margin-bottom: 12px;
-}
-
-/* Font Preview */
-.font-preview {
-padding: 12px;
-background: rgba(255, 255, 255, 0.03);
-border-radius: 8px;
-cursor: pointer;
-transition: all 0.3s;
-border: 2px solid transparent;
-}
-
-.font-preview:hover {
-background: rgba(255, 255, 255, 0.06);
-}
-
-.font-preview.selected {
-border-color: var(--accent);
-}
-
-/* Video Background Option */
-.video-option {
-aspect-ratio: 16/9;
-border-radius: 12px;
-overflow: hidden;
-position: relative;
-cursor: pointer;
-border: 2px solid transparent;
-transition: all 0.3s;
-}
-
-.video-option:hover {
-transform: scale(1.02);
-}
-
-.video-option.selected {
-border-color: var(--accent);
-}
-
-/* Project Card */
-.project-card {
-background: rgba(255, 255, 255, 0.03);
-border: 1px solid rgba(255, 255, 255, 0.1);
-border-radius: 12px;
-overflow: hidden;
-transition: all 0.3s;
-}
-
-.project-card:hover {
-transform: translateY(-4px);
-border-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Gallery Grid */
-.gallery-grid {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-gap: 8px;
-}
-
-.gallery-item {
-aspect-ratio: 1;
-border-radius: 8px;
-overflow: hidden;
-cursor: pointer;
-transition: all 0.3s;
-}
-
-.gallery-item:hover {
-transform: scale(1.05);
-}
-
-/* Blog Post */
-.blog-post {
-background: rgba(255, 255, 255, 0.03);
-border: 1px solid rgba(255, 255, 255, 0.1);
-border-radius: 12px;
-padding: 20px;
-margin-bottom: 16px;
-transition: all 0.3s;
-}
-
-.blog-post:hover {
-border-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Custom URL Input */
-.url-input-group {
-display: flex;
-align-items: center;
-background: rgba(255, 255, 255, 0.03);
-border: 1px solid rgba(255, 255, 255, 0.1);
-border-radius: 12px;
-overflow: hidden;
-}
-
-.url-input-group .prefix {
-padding: 14px 16px;
-color: var(--text-muted);
-font-size: 14px;
-border-right: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.url-input-group input {
-flex: 1;
-border: none;
-background: transparent;
-}
-
-/* Locked Feature Overlay */
-.locked-overlay {
-position: absolute;
-inset: 0;
-background: rgba(0, 0, 0, 0.7);
-display: flex;
-align-items: center;
-justify-content: center;
-border-radius: inherit;
-}
-
-/* Selection */
-::selection {
-background: var(--accent);
-color: black;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>sou1crush | Portfolio Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #0a0a0a;
+            --surface: #111111;
+            --surface-elevated: #1a1a1a;
+            --accent: #00d4ff;
+            --accent-secondary: #ff006e;
+            --text: #ffffff;
+            --text-muted: #888888;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Background */
+        .mesh-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: 
+                radial-gradient(at 0% 0%, rgba(0, 212, 255, 0.08) 0, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(255, 0, 110, 0.08) 0, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 212, 255, 0.05) 0, transparent 50%),
+                #050505;
+        }
+
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.02;
+            z-index: -1;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Modern Card */
+        .card {
+            background: rgba(17, 17, 17, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Modern Button - Clean, no spin */
+        .btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08));
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #0099cc);
+            border-color: transparent;
+            color: black;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #33ddff, #00b3e6);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            appearance: none;
+            width: 48px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .toggle:checked {
+            background: var(--accent);
+        }
+
+        .toggle:checked::after {
+            transform: translateX(22px);
+        }
+
+        /* Input */
+        .input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Tab Navigation */
+        .tab {
+            position: relative;
+            padding: 12px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            background: none;
+        }
+
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s;
+            border-radius: 2px;
+        }
+
+        .tab.active {
+            color: var(--accent);
+        }
+
+        .tab.active::after {
+            width: 60%;
+        }
+
+        /* Page */
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 16px 28px;
+            border-radius: 12px;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Preview Frame */
+        .preview-frame {
+            width: 100%;
+            height: 400px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: white;
+            overflow: hidden;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #0d0d0d;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* Theme Cards */
+        .theme-card {
+            aspect-ratio: 16/10;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .theme-card.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .theme-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            color: black;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* Feature Row */
+        .feature-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .feature-row:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Premium Badge */
+        .premium-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: black;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Status Dot */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00ff88;
+        }
+
+        /* Visualizer Bars */
+        .viz-bar {
+            width: 3px;
+            background: linear-gradient(to top, var(--accent), transparent);
+            border-radius: 2px;
+            animation: viz 0.8s ease-in-out infinite;
+        }
+
+        @keyframes viz {
+            0%, 100% { height: 20%; }
+            50% { height: 100%; }
+        }
+
+        /* Loading Screen */
+        .loader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Selection */
+        ::selection {
+            background: var(--accent);
+            color: black;
+        }
+    </style>
 </head>
 <body>
 
-<!-- Loader -->
-<div class="loader" id="loader">
-<div class="w-12 h-12 border-2 border-white/10 border-t-cyan-400 rounded-full mb-4" style="animation: spin 1s linear infinite;"></div>
-<div class="text-sm text-gray-500 tracking-widest">INITIALIZING</div>
-</div>
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="w-12 h-12 border-2 border-white/10 border-t-cyan-400 rounded-full mb-4" style="animation: spin 1s linear infinite;"></div>
+        <div class="text-sm text-gray-500 tracking-widest">LOADING</div>
+        <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+    </div>
 
-<!-- Background -->
-<div class="mesh-bg"></div>
-<div class="noise"></div>
+    <!-- Background -->
+    <div class="mesh-bg"></div>
+    <div class="noise"></div>
 
-<!-- Toast -->
-<div class="toast" id="toast">Message</div>
+    <!-- Toast -->
+    <div class="toast" id="toast">Message</div>
 
-<!-- Watermark (Free Users) -->
-<div class="watermark" id="watermark">Made with sou1crush</div>
+    <!-- Main Container -->
+    <div class="max-w-lg mx-auto min-h-screen flex flex-col">
+        
+        <!-- Header -->
+        <header class="p-6 pt-12 text-center relative">
+            <button onclick="showPage('create')" class="absolute top-6 right-6 w-10 h-10 btn p-0 rounded-full">
+                <i class="fas fa-plus text-sm"></i>
+            </button>
 
-<!-- Auth Modal -->
-<div class="modal-overlay" id="auth-modal">
-<div class="modal">
-<div class="p-6 border-b border-white/10">
-<div class="flex items-center justify-between">
-<h2 class="text-xl font-bold" id="auth-title">Sign In</h2>
-<button onclick="closeModal('auth-modal')" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-white">
-<i class="fas fa-times"></i>
-</button>
-</div>
-</div>
-<div class="p-6">
-<form id="auth-form" onsubmit="handleAuth(event)">
-<div class="space-y-4">
-<div>
-<label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Email</label>
-<input type="email" id="auth-email" class="input" placeholder="you@example.com" required>
-</div>
-<div>
-<label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Password</label>
-<input type="password" id="auth-password" class="input" placeholder="••••••••" required>
-</div>
-<div id="auth-username-field" class="hidden">
-<label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Username</label>
-<input type="text" id="auth-username" class="input" placeholder="Choose a username">
-</div>
-</div>
-<button type="submit" class="w-full btn-primary mt-6" id="auth-submit">
-Sign In
-</button>
-</form>
-<div class="mt-4 text-center">
-<button onclick="toggleAuthMode()" class="text-sm text-cyan-400 hover:underline" id="auth-toggle">
-Don't have an account? Sign up
-</button>
-</div>
-</div>
-</div>
-</div>
+            <div class="relative w-28 h-28 mx-auto mb-4">
+                <div class="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/20 to-pink-500/20 blur-xl"></div>
+                <img src="https://i.pinimg.com/736x/38/08/9a/38089ade5d66e5e20c8fad9bf539b5ab.jpg" 
+                     alt="sou1crush" 
+                     class="w-full h-full rounded-full object-cover border-2 border-white/10 relative z-10">
+                <div class="absolute bottom-1 right-1 w-6 h-6 bg-black rounded-full flex items-center justify-center z-20">
+                    <div class="status-dot"></div>
+                </div>
+            </div>
+            
+            <h1 class="text-3xl font-bold mb-1">sou1crush</h1>
+            <p class="text-gray-500 text-sm">Online • Looking for friends</p>
+        </header>
 
-<!-- Payment Modal -->
-<div class="modal-overlay" id="payment-modal">
-<div class="modal">
-<div class="p-6 border-b border-white/10">
-<div class="flex items-center justify-between">
-<h2 class="text-xl font-bold flex items-center gap-2">
-<i class="fas fa-crown text-yellow-400"></i>
-Upgrade to Pro
-</h2>
-<button onclick="closeModal('payment-modal')" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-white">
-<i class="fas fa-times"></i>
-</button>
-</div>
-</div>
-<div class="p-6">
-<div class="text-center mb-6">
-<div class="text-4xl font-bold mb-2">$9.99<span class="text-lg text-gray-500 font-normal">/month</span></div>
-<p class="text-sm text-gray-500">Unlock all premium features</p>
-</div>
+        <!-- Navigation -->
+        <nav class="px-6 mb-6 flex justify-center border-b border-white/10">
+            <button onclick="showPage('home')" class="tab active" data-page="home">Home</button>
+            <button onclick="showPage('music')" class="tab" data-page="music">Music</button>
+            <button onclick="showPage('socials')" class="tab" data-page="socials">Socials</button>
+            <button onclick="showPage('create')" class="tab" data-page="create">Create</button>
+            <button onclick="showPage('creative')" class="tab" data-page="creative">Creative</button>
+        </nav>
 
-<div class="space-y-3 mb-6">
-<div class="flex items-center gap-3 text-sm">
-<i class="fas fa-check text-green-400"></i>
-<span>Advanced animated themes</span>
-</div>
-<div class="flex items-center gap-3 text-sm">
-<i class="fas fa-check text-green-400"></i>
-<span>Custom fonts & video backgrounds</span>
-</div>
-<div class="flex items-center gap-3 text-sm">
-<i class="fas fa-check text-green-400"></i>
-<span>Analytics & visitor counter</span>
-</div>
-<div class="flex items-center gap-3 text-sm">
-<i class="fas fa-check text-green-400"></i>
-<span>Remove watermark</span>
-</div>
-<div class="flex items-center gap-3 text-sm">
-<i class="fas fa-check text-green-400"></i>
-<span>Custom profile URL</span>
-</div>
-<div class="flex items-center gap-3 text-sm">
-<i class="fas fa-check text-green-400"></i>
-<span>Unlimited social links</span>
-</div>
-<div class="flex items-center gap-3 text-sm">
-<i class="fas fa-check text-green-400"></i>
-<span>Projects, gallery & blog sections</span>
-</div>
-<div class="flex items-center gap-3 text-sm">
-<i class="fas fa-check text-green-400"></i>
-<span>Guestbook & messaging</span>
-</div>
-</div>
+        <!-- HOME PAGE -->
+        <main id="home" class="page active px-6 pb-32 flex-1">
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="card p-4 text-center">
+                    <div class="text-2xl font-bold text-cyan-400">16</div>
+                    <div class="text-xs text-gray-500 mt-1">Age</div>
+                </div>
+                <div class="card p-4 text-center">
+                    <div class="text-2xl font-bold text-pink-500">EST</div>
+                    <div class="text-xs text-gray-500 mt-1">Timezone</div>
+                </div>
+                <div class="card p-4 text-center">
+                    <div class="text-2xl font-bold text-purple-400">∞</div>
+                    <div class="text-xs text-gray-500 mt-1">Vibes</div>
+                </div>
+            </div>
 
-<div id="payment-form">
-<div class="space-y-4">
-<div>
-<label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Card Number</label>
-<div class="input flex items-center gap-3">
-<i class="fas fa-credit-card text-gray-500"></i>
-<input type="text" id="card-number" placeholder="4242 4242 4242 4242" class="bg-transparent border-none outline-none flex-1 text-white">
-</div>
-</div>
-<div class="grid grid-cols-2 gap-4">
-<div>
-<label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Expiry</label>
-<input type="text" id="card-expiry" placeholder="MM/YY" class="input">
-</div>
-<div>
-<label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">CVC</label>
-<input type="text" id="card-cvc" placeholder="123" class="input">
-</div>
-</div>
-</div>
-<button onclick="processPayment()" class="w-full btn-gold mt-6" id="pay-button">
-<i class="fas fa-lock"></i>
-Pay $9.99
-</button>
-</div>
-</div>
-</div>
-</div>
+            <div class="space-y-3 mb-6">
+                <button onclick="copyDiscord()" class="w-full card p-4 flex items-center gap-4 btn text-left !p-4">
+                    <div class="w-12 h-12 rounded-full bg-[#5865F2]/20 flex items-center justify-center text-[#5865F2]">
+                        <i class="fab fa-discord text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-semibold">Add on Discord</p>
+                        <p class="text-xs text-gray-500 font-mono">sou1crush</p>
+                    </div>
+                    <i class="fas fa-copy text-gray-500"></i>
+                </button>
 
-<!-- Main App -->
-<div class="max-w-lg mx-auto min-h-screen flex flex-col" id="app">
+                <button onclick="showPage('socials')" class="w-full card p-4 flex items-center gap-4 btn text-left !p-4">
+                    <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+                        <i class="fas fa-link text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-semibold">All Links</p>
+                        <p class="text-xs text-gray-500">Connect everywhere</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-500"></i>
+                </button>
+            </div>
 
-<!-- Header -->
-<header class="p-6 pt-12">
-<div class="flex items-center justify-between mb-6">
-<div class="flex items-center gap-3">
-<div class="relative">
-<img src="https://i.pinimg.com/736x/38/08/9a/38089ade5d66e5e20c8fad9bf539b5ab.jpg"
-alt="Profile"
-id="header-avatar"
-class="w-10 h-10 rounded-full object-cover border border-white/20">
-<div class="absolute -bottom-1 -right-1 w-4 h-4 bg-black rounded-full flex items-center justify-center">
-<div class="status-dot" id="header-status"></div>
-</div>
-</div>
-<div>
-<h1 class="font-bold text-lg" id="header-username">sou1crush</h1>
-<div class="flex items-center gap-2" id="header-badges">
-<span class="badge-pro">Free</span>
-</div>
-</div>
-</div>
-<div class="flex items-center gap-2">
-<button onclick="showPage('messages')" class="relative w-10 h-10 btn !p-0">
-<i class="fas fa-envelope"></i>
-<span id="message-badge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center hidden">0</span>
-</button>
-<button onclick="toggleAuth()" class="w-10 h-10 btn !p-0" id="auth-button">
-<i class="fas fa-user"></i>
-</button>
-</div>
-</div>
+            <div class="card p-6 mb-6">
+                <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-user text-cyan-400"></i>
+                    About Me
+                </h2>
+                <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                    Just a normal person who loves <span class="text-cyan-400">Roblox</span> and making new friends. Always down to play games or chat about music.
+                </p>
+                <div class="flex gap-2 flex-wrap">
+                    <span class="px-3 py-1.5 rounded-lg bg-cyan-400/10 border border-cyan-400/20 text-xs text-cyan-400">
+                        <i class="fas fa-gamepad mr-1"></i>Roblox
+                    </span>
+                    <span class="px-3 py-1.5 rounded-lg bg-pink-500/10 border border-pink-500/20 text-xs text-pink-400">
+                        <i class="fas fa-music mr-1"></i>Hip Hop
+                    </span>
+                    <span class="px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-xs text-purple-400">
+                        <i class="fas fa-moon mr-1"></i>Night Owl
+                    </span>
+                </div>
+            </div>
 
-<!-- Navigation -->
-<nav class="flex justify-between border-b border-white/10">
-<button onclick="showPage('home')" class="tab active" data-page="home">Home</button>
-<button onclick="showPage('creative')" class="tab" data-page="creative">Create</button>
-<button onclick="showPage('analytics')" class="tab" data-page="analytics">Stats</button>
-<button onclick="showPage('messages')" class="tab" data-page="messages">Inbox</button>
-<button onclick="showPage('profile')" class="tab" data-page="profile">Profile</button>
-</nav>
-</header>
+            <div onclick="showPage('music')" class="card p-4 flex items-center gap-4 cursor-pointer btn !p-4">
+                <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-800 to-black flex items-center justify-center border border-white/10">
+                    <div class="flex gap-0.5 h-6 items-end">
+                        <div class="viz-bar" style="animation-delay: 0s"></div>
+                        <div class="viz-bar" style="animation-delay: 0.1s"></div>
+                        <div class="viz-bar" style="animation-delay: 0.2s"></div>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs text-cyan-400 mb-0.5 flex items-center gap-1">
+                        <span class="w-1 h-1 bg-cyan-400 rounded-full"></span>
+                        NOW PLAYING
+                    </p>
+                    <p class="font-medium truncate">Get Throwed</p>
+                    <p class="text-xs text-gray-500 truncate">Bun B • Trill</p>
+                </div>
+                <i class="fas fa-play text-cyan-400"></i>
+            </div>
+        </main>
 
-<!-- HOME PAGE -->
-<main id="home" class="page active px-6 pb-32 flex-1">
-<!-- Quick Stats -->
-<div class="grid grid-cols-2 gap-4 mb-6">
-<div class="stat-card">
-<div class="stat-value" id="stat-views">0</div>
-<div class="text-xs text-gray-500 mt-1">Page Views</div>
-</div>
-<div class="stat-card">
-<div class="stat-value" id="stat-clicks">0</div>
-<div class="text-xs text-gray-500 mt-1">Link Clicks</div>
-</div>
-</div>
+        <!-- MUSIC PAGE -->
+        <main id="music" class="page px-6 pb-32 flex-1">
+            <div class="card p-6 mb-6">
+                <div class="aspect-square rounded-2xl bg-gradient-to-br from-gray-900 via-black to-gray-800 mb-6 relative overflow-hidden border border-white/10">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <i class="fas fa-compact-disc text-8xl text-gray-800"></i>
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <button onclick="togglePlay()" class="w-20 h-20 rounded-full bg-cyan-400/20 backdrop-blur-md border border-cyan-400/50 flex items-center justify-center text-cyan-400 btn !p-0">
+                            <i class="fas fa-pause text-2xl" id="music-play-icon"></i>
+                        </button>
+                    </div>
 
-<!-- Visitor Counter -->
-<div class="flex justify-center mb-6">
-<div class="visitor-counter">
-<i class="fas fa-users"></i>
-<span id="visitor-count">1,234 visitors today</span>
-</div>
-</div>
+                    <div class="absolute bottom-4 left-4 right-4 flex justify-center items-end gap-1 h-12 opacity-60">
+                        <div class="viz-bar flex-1" style="animation-duration: 0.7s"></div>
+                        <div class="viz-bar flex-1" style="animation-duration: 0.9s"></div>
+                        <div class="viz-bar flex-1" style="animation-duration: 0.8s"></div>
+                        <div class="viz-bar flex-1" style="animation-duration: 1s"></div>
+                        <div class="viz-bar flex-1" style="animation-duration: 0.6s"></div>
+                    </div>
+                </div>
 
-<!-- Actions -->
-<div class="space-y-3 mb-6">
-<button onclick="showPage('creative')" class="w-full btn-primary">
-<i class="fas fa-magic"></i>
-Create Portfolio
-</button>
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold mb-2">Get Throwed</h2>
+                    <p class="text-gray-500">Bun B • Trill</p>
+                </div>
 
-<button onclick="openPayment()" class="w-full btn-gold" id="upgrade-btn">
-<i class="fas fa-crown"></i>
-Upgrade to Pro
-</button>
-</div>
+                <div class="mb-6">
+                    <div class="flex justify-between text-xs text-gray-600 mb-2 font-mono">
+                        <span id="current-time">0:34</span>
+                        <span>3:10</span>
+                    </div>
+                    <div class="h-1.5 bg-white/5 rounded-full overflow-hidden cursor-pointer" onclick="seek(event)">
+                        <div class="h-full bg-gradient-to-r from-cyan-400 to-pink-500 rounded-full transition-all" id="progress-bar" style="width: 18%"></div>
+                    </div>
+                </div>
 
-<!-- Recent Activity -->
-<div class="card p-6">
-<h3 class="font-semibold mb-4 flex items-center gap-2">
-<i class="fas fa-chart-line text-cyan-400"></i>
-Recent Activity
-</h3>
-<div id="activity-list" class="space-y-3">
-<div class="text-sm text-gray-500 text-center py-4">No recent activity</div>
-</div>
-</div>
-</main>
+                <div class="flex items-center justify-center gap-6">
+                    <button onclick="prevSong()" class="w-12 h-12 rounded-full btn !p-0 text-gray-400 hover:text-white">
+                        <i class="fas fa-step-backward"></i>
+                    </button>
+                    <button onclick="togglePlay()" class="w-16 h-16 rounded-full btn-primary !p-0" id="main-play-btn">
+                        <i class="fas fa-pause text-xl" id="main-play-icon"></i>
+                    </button>
+                    <button onclick="nextSong()" class="w-12 h-12 rounded-full btn !p-0 text-gray-400 hover:text-white">
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                </div>
+            </div>
 
-<!-- CREATIVE PAGE -->
-<main id="creative" class="page px-6 pb-32 flex-1">
-<div class="flex items-center justify-between mb-2">
-<h2 class="text-xl font-bold">Creative Studio</h2>
-<span class="badge-pro" id="creative-badge">Free</span>
-</div>
-<p class="text-gray-500 text-sm mb-6">Build your perfect portfolio</p>
+            <div class="card p-5 border-l-2 border-cyan-400">
+                <p class="text-xs text-cyan-400 mb-2 font-mono uppercase">Lyrics</p>
+                <p class="text-sm text-gray-400 italic">
+                    "Good weed, good drink, big money, we... I handle my business so I think I deserve to get throwed"
+                </p>
+            </div>
+        </main>
 
-<!-- Live Preview -->
-<div class="mb-6">
-<div class="flex items-center justify-between mb-3">
-<h3 class="text-sm font-semibold text-cyan-400">Live Preview</h3>
-<div class="flex gap-2">
-<button onclick="refreshPreview()" class="btn btn-secondary !py-2 !px-3 text-xs">
-<i class="fas fa-sync-alt"></i>
-</button>
-<button onclick="togglePreviewSize()" class="btn btn-secondary !py-2 !px-3 text-xs">
-<i class="fas fa-expand"></i>
-</button>
-</div>
-</div>
-<iframe id="preview-frame" class="preview-frame"></iframe>
-</div>
+        <!-- SOCIALS PAGE -->
+        <main id="socials" class="page px-6 pb-32 flex-1">
+            <h2 class="text-xl font-bold mb-6">Connect</h2>
+            
+            <div class="space-y-3">
+                <button onclick="copyDiscord()" class="w-full card p-4 flex items-center gap-4 btn text-left !p-4">
+                    <div class="w-12 h-12 rounded-full bg-[#5865F2]/20 flex items-center justify-center text-[#5865F2]">
+                        <i class="fab fa-discord text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold">Discord</h3>
+                        <p class="text-xs text-gray-500 font-mono">sou1crush</p>
+                    </div>
+                    <i class="fas fa-copy text-gray-500"></i>
+                </button>
 
-<!-- Theme Selection -->
-<div class="card p-6 mb-6">
-<div class="flex items-center justify-between mb-4">
-<h3 class="text-sm font-semibold flex items-center gap-2">
-<i class="fas fa-palette text-cyan-400"></i>
-Theme
-</h3>
-<span class="badge-premium">Pro</span>
-</div>
-<div class="grid grid-cols-3 gap-3" id="theme-grid">
-<!-- Basic Themes (Free) -->
-<div class="theme-card selected" onclick="selectTheme('cyber')" id="theme-cyber" style="background: linear-gradient(135deg, #0a0a0a, #111);">
-<div class="absolute inset-0 flex items-center justify-center">
-<span class="text-xs font-medium">Cyber</span>
-</div>
-</div>
-<div class="theme-card" onclick="selectTheme('minimal')" id="theme-minimal" style="background: linear-gradient(135deg, #1a1a1a, #2a2a2a);">
-<div class="absolute inset-0 flex items-center justify-center">
-<span class="text-xs font-medium">Minimal</span>
-</div>
-</div>
-<!-- Premium Themes (Locked) -->
-<div class="theme-card relative" onclick="selectTheme('neon')" id="theme-neon" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);">
-<div class="absolute inset-0 flex items-center justify-center">
-<span class="text-xs font-medium">Neon</span>
-</div>
-<div class="locked-overlay" id="lock-neon">
-<i class="fas fa-lock text-white/50"></i>
-</div>
-</div>
-<div class="theme-card relative" onclick="selectTheme('aurora')" id="theme-aurora" style="background: linear-gradient(135deg, #1a1f3c, #2d1b4e, #1a1f3c);">
-<div class="absolute inset-0 flex items-center justify-center">
-<span class="text-xs font-medium">Aurora</span>
-</div>
-<div class="locked-overlay" id="lock-aurora">
-<i class="fas fa-lock text-white/50"></i>
-</div>
-</div>
-<div class="theme-card relative" onclick="selectTheme('gold')" id="theme-gold" style="background: linear-gradient(135deg, #1a1500, #2a2000, #1a1500);">
-<div class="absolute inset-0 flex items-center justify-center">
-<span class="text-xs font-medium">Gold</span>
-</div>
-<div class="locked-overlay" id="lock-gold">
-<i class="fas fa-lock text-white/50"></i>
-</div>
-</div>
-</div>
-</div>
+                <a href="#" class="block card p-4 flex items-center gap-4 btn text-left !p-4">
+                    <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+                        <i class="fas fa-gamepad text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold">Roblox</h3>
+                        <p class="text-xs text-gray-500">Let's play together</p>
+                    </div>
+                    <i class="fas fa-external-link-alt text-gray-500"></i>
+                </a>
 
-<!-- Custom Fonts -->
-<div class="card p-6 mb-6">
-<div class="flex items-center justify-between mb-4">
-<h3 class="text-sm font-semibold flex items-center gap-2">
-<i class="fas fa-font text-cyan-400"></i>
-Custom Fonts
-</h3>
-<span class="badge-premium">Pro</span>
-</div>
-<div class="grid grid-cols-2 gap-3" id="font-grid">
-<div class="font-preview selected" onclick="selectFont('inter')" id="font-inter">
-<div class="text-lg mb-1" style="font-family: 'Inter', sans-serif;">Aa</div>
-<div class="text-xs text-gray-500">Inter</div>
-</div>
-<div class="font-preview" onclick="selectFont('space')" id="font-space" style="font-family: 'Space Grotesk', sans-serif;">
-<div class="text-lg mb-1">Aa</div>
-<div class="text-xs text-gray-500">Space</div>
-<div class="locked-overlay" id="lock-font-space">
-<i class="fas fa-lock text-white/50 text-xs"></i>
-</div>
-</div>
-<div class="font-preview" onclick="selectFont('outfit')" id="font-outfit" style="font-family: 'Outfit', sans-serif;">
-<div class="text-lg mb-1">Aa</div>
-<div class="text-xs text-gray-500">Outfit</div>
-<div class="locked-overlay" id="lock-font-outfit">
-<i class="fas fa-lock text-white/50 text-xs"></i>
-</div>
-</div>
-<div class="font-preview" onclick="selectFont('mono')" id="font-mono" style="font-family: 'JetBrains Mono', monospace;">
-<div class="text-lg mb-1">Aa</div>
-<div class="text-xs text-gray-500">Mono</div>
-<div class="locked-overlay" id="lock-font-mono">
-<i class="fas fa-lock text-white/50 text-xs"></i>
-</div>
-</div>
-</div>
-</div>
+                <a href="#" class="block card p-4 flex items-center gap-4 btn text-left !p-4">
+                    <div class="w-12 h-12 rounded-full bg-pink-500/20 flex items-center justify-center text-pink-400">
+                        <i class="fab fa-instagram text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold">Instagram</h3>
+                        <p class="text-xs text-gray-500">@sou1crush</p>
+                    </div>
+                    <i class="fas fa-external-link-alt text-gray-500"></i>
+                </a>
 
-<!-- Video Background -->
-<div class="card p-6 mb-6">
-<div class="flex items-center justify-between mb-4">
-<h3 class="text-sm font-semibold flex items-center gap-2">
-<i class="fas fa-video text-cyan-400"></i>
-Video Background
-</h3>
-<span class="badge-premium">Pro</span>
-</div>
-<div class="grid grid-cols-2 gap-3 mb-4" id="video-grid">
-<div class="video-option selected" onclick="selectVideo('none')" id="video-none" style="background: #111;">
-<div class="absolute inset-0 flex items-center justify-center">
-<span class="text-xs">None</span>
-</div>
-</div>
-<div class="video-option relative" onclick="selectVideo('rain')" id="video-rain">
-<div class="absolute inset-0 bg-gradient-to-br from-blue-900/50 to-purple-900/50"></div>
-<div class="absolute inset-0 flex items-center justify-center">
-<span class="text-xs">Rain</span>
-</div>
-<div class="locked-overlay" id="lock-video-rain">
-<i class="fas fa-lock text-white/50"></i>
-</div>
-</div>
-<div class="video-option relative" onclick="selectVideo('space')" id="video-space">
-<div class="absolute inset-0 bg-gradient-to-br from-indigo-900/50 to-black"></div>
-<div class="absolute inset-0 flex items-center justify-center">
-<span class="text-xs">Space</span>
-</div>
-<div class="locked-overlay" id="lock-video-space">
-<i class="fas fa-lock text-white/50"></i>
-</div>
-</div>
-<div class="video-option relative" onclick="selectVideo('city')" id="video-city">
-<div class="absolute inset-0 bg-gradient-to-br from-pink-900/50 to-orange-900/50"></div>
-<div class="absolute inset-0 flex items-center justify-center">
-<span class="text-xs">City</span>
-</div>
-<div class="locked-overlay" id="lock-video-city">
-<i class="fas fa-lock text-white/50"></i>
-</div>
-</div>
-</div>
-<input type="text" id="custom-video-url" class="input" placeholder="Or enter custom video URL..." oninput="updatePreview()">
-</div>
+                <a href="#" class="block card p-4 flex items-center gap-4 btn text-left !p-4">
+                    <div class="w-12 h-12 rounded-full bg-sky-500/20 flex items-center justify-center text-sky-400">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold">Twitter</h3>
+                        <p class="text-xs text-gray-500">@sou1crush</p>
+                    </div>
+                    <i class="fas fa-external-link-alt text-gray-500"></i>
+                </a>
 
-<!-- Profile Settings -->
-<div class="card p-6 mb-6">
-<h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
-<i class="fas fa-user text-cyan-400"></i>
-Profile
-</h3>
-<div class="space-y-4">
-<input type="text" id="creative-username" class="input" placeholder="Username" oninput="updatePreview()">
-<input type="text" id="creative-image" class="input" placeholder="Profile Image URL" oninput="updatePreview()">
-<input type="text" id="creative-banner" class="input" placeholder="Banner Image URL (Pro)" oninput="updatePreview()">
-<input type="text" id="creative-discord" class="input" placeholder="Discord Username" oninput="updatePreview()">
-<textarea id="creative-bio" class="input" rows="2" placeholder="Bio" oninput="updatePreview()"></textarea>
-</div>
-</div>
+                <a href="#" class="block card p-4 flex items-center gap-4 btn text-left !p-4">
+                    <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                        <i class="fab fa-tiktok text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold">TikTok</h3>
+                        <p class="text-xs text-gray-500">@sou1crush</p>
+                    </div>
+                    <i class="fas fa-external-link-alt text-gray-500"></i>
+                </a>
 
-<!-- Custom URL -->
-<div class="card p-6 mb-6">
-<div class="flex items-center justify-between mb-4">
-<h3 class="text-sm font-semibold flex items-center gap-2">
-<i class="fas fa-link text-cyan-400"></i>
-Custom URL
-</h3>
-<span class="badge-premium">Pro</span>
-</div>
-<div class="url-input-group">
-<span class="prefix">sou1crush.io/</span>
-<input type="text" id="custom-url" class="input !border-none" placeholder="yourname" oninput="checkUrlAvailability()">
-</div>
-<p class="text-xs text-gray-500 mt-2" id="url-status">Enter your custom URL</p>
-</div>
+                <a href="#" class="block card p-4 flex items-center gap-4 btn text-left !p-4">
+                    <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400">
+                        <i class="fab fa-snapchat text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold">Snapchat</h3>
+                        <p class="text-xs text-gray-500">sou1crush</p>
+                    </div>
+                    <i class="fas fa-external-link-alt text-gray-500"></i>
+                </a>
+            </div>
+        </main>
 
-<!-- Music Settings -->
-<div class="card p-6 mb-6">
-<h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
-<i class="fas fa-music text-cyan-400"></i>
-Music Player
-</h3>
-<div class="space-y-4">
-<input type="text" id="creative-song" class="input" placeholder="Song Name" oninput="updatePreview()">
-<input type="text" id="creative-artist" class="input" placeholder="Artist Name" oninput="updatePreview()">
-<input type="text" id="creative-music-url" class="input" placeholder="Music File URL (MP3)" oninput="updatePreview()">
+        <!-- CREATE PAGE (Basic) -->
+        <main id="create" class="page px-6 pb-32 flex-1">
+            <h2 class="text-xl font-bold mb-2">Create Portfolio</h2>
+            <p class="text-gray-500 text-sm mb-6">Build your own page</p>
 
-<div class="feature-row">
-<div>
-<p class="font-medium text-sm">Auto-play Music</p>
-<p class="text-xs text-gray-500">Start playing when page loads</p>
-</div>
-<input type="checkbox" id="creative-autoplay" class="toggle" onchange="updatePreview()">
-</div>
+            <div class="card p-6 space-y-5">
+                <div>
+                    <label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Username</label>
+                    <input type="text" id="basic-username" class="input" placeholder="yourname">
+                </div>
 
-<div class="feature-row">
-<div>
-<p class="font-medium text-sm">Visualizer</p>
-<p class="text-xs text-gray-500">Show audio visualizer bars</p>
-</div>
-<input type="checkbox" id="creative-visualizer" class="toggle" checked onchange="updatePreview()">
-</div>
+                <div>
+                    <label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Profile Image URL</label>
+                    <input type="text" id="basic-image" class="input" placeholder="https://...">
+                </div>
 
-<div class="feature-row">
-<div>
-<p class="font-medium text-sm">Full Music Player</p>
-<p class="text-xs text-gray-500">Pro-style player with controls</p>
-<span class="badge-premium mt-1 inline-flex">Pro</span>
-</div>
-<input type="checkbox" id="creative-full-player" class="toggle" onchange="updatePreview()" disabled>
-</div>
-</div>
-</div>
+                <div>
+                    <label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Discord</label>
+                    <input type="text" id="basic-discord" class="input" placeholder="username">
+                </div>
 
-<!-- Animation Settings -->
-<div class="card p-6 mb-6">
-<h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
-<i class="fas fa-wand-magic-sparkles text-cyan-400"></i>
-Animations
-</h3>
-<div class="space-y-3">
-<div class="feature-row">
-<div>
-<p class="font-medium text-sm">Page Load Animation</p>
-<p class="text-xs text-gray-500">Smooth fade-in on startup</p>
-</div>
-<input type="checkbox" id="creative-load-anim" class="toggle" checked onchange="updatePreview()">
-</div>
+                <div>
+                    <label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Bio</label>
+                    <textarea id="basic-bio" class="input" rows="3" placeholder="Tell people about yourself..."></textarea>
+                </div>
 
-<div class="feature-row">
-<div>
-<p class="font-medium text-sm">Hover Effects</p>
-<p class="text-xs text-gray-500">Interactive button states</p>
-</div>
-<input type="checkbox" id="creative-hover" class="toggle" checked onchange="updatePreview()">
-</div>
+                <button onclick="generateBasic()" class="w-full btn-primary">
+                    <i class="fas fa-magic"></i>
+                    Generate Basic
+                </button>
+            </div>
 
-<div class="feature-row">
-<div>
-<p class="font-medium text-sm">Background Particles</p>
-<p class="text-xs text-gray-500">Floating dot animation</p>
-</div>
-<input type="checkbox" id="creative-particles" class="toggle" onchange="updatePreview()">
-</div>
+            <div id="basic-output" class="mt-6 hidden">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold">Generated Code</h3>
+                    <button onclick="copyBasic()" class="btn btn-secondary !py-2 !px-4 text-xs">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+                <div class="code-block" id="basic-code"></div>
+            </div>
+        </main>
 
-<div class="feature-row">
-<div>
-<p class="font-medium text-sm">Glitch Text Effect</p>
-<p class="text-xs text-gray-500">Cyberpunk name animation</p>
-<span class="badge-premium mt-1 inline-flex">Pro</span>
-</div>
-<input type="checkbox" id="creative-glitch" class="toggle" onchange="updatePreview()" disabled>
-</div>
+        <!-- CREATIVE PAGE (Advanced) -->
+        <main id="creative" class="page px-6 pb-32 flex-1">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-xl font-bold">Creative Studio</h2>
+                <span class="premium-badge">
+                    <i class="fas fa-crown text-xs"></i>
+                    Pro
+                </span>
+            </div>
+            <p class="text-gray-500 text-sm mb-6">Advanced customization & real-time preview</p>
 
-<div class="feature-row">
-<div>
-<p class="font-medium text-sm">3D Tilt Cards</p>
-<p class="text-xs text-gray-500">Mouse-following 3D effect</p>
-<span class="badge-premium mt-1 inline-flex">Pro</span>
-</div>
-<input type="checkbox" id="creative-tilt" class="toggle" onchange="updatePreview()" disabled>
-</div>
-</div>
-</div>
+            <!-- Live Preview -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold text-cyan-400">Live Preview</h3>
+                    <button onclick="refreshPreview()" class="btn btn-secondary !py-2 !px-3 text-xs">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <iframe id="preview-frame" class="preview-frame"></iframe>
+            </div>
 
-<!-- Extra Sections -->
-<div class="card p-6 mb-6">
-<div class="flex items-center justify-between mb-4">
-<h3 class="text-sm font-semibold flex items-center gap-2">
-<i class="fas fa-layer-group text-cyan-400"></i>
-Extra Sections
-</h3>
-<span class="badge-premium">Pro</span>
-</div>
+            <!-- Theme Selection -->
+            <div class="card p-6 mb-6">
+                <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-palette text-cyan-400"></i>
+                    Theme
+                </h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="theme-card selected" onclick="selectTheme('cyber')" id="theme-cyber" style="background: linear-gradient(135deg, #0a0a0a, #111);">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-xs font-medium">Cyber</span>
+                        </div>
+                    </div>
+                    <div class="theme-card" onclick="selectTheme('midnight')" id="theme-midnight" style="background: linear-gradient(135deg, #0f172a, #1e293b);">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-xs font-medium">Midnight</span>
+                        </div>
+                    </div>
+                    <div class="theme-card" onclick="selectTheme('sakura')" id="theme-sakura" style="background: linear-gradient(135deg, #2d1f2d, #3d2f3d);">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-xs font-medium">Sakura</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<div class="space-y-3 mb-4">
-<div class="feature-row">
-<div>
-<p class="font-medium text-sm">Projects Showcase</p>
-<p class="text-xs text-gray-500">Display your work</p>
-</div>
-<input type="checkbox" id="creative-projects" class="toggle" onchange="toggleSection('projects')" disabled>
-</div>
+            <!-- Profile Settings -->
+            <div class="card p-6 mb-6">
+                <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-user text-cyan-400"></i>
+                    Profile
+                </h3>
+                <div class="space-y-4">
+                    <input type="text" id="creative-username" class="input" placeholder="Username" oninput="updatePreview()">
+                    <input type="text" id="creative-image" class="input" placeholder="Profile Image URL" oninput="updatePreview()">
+                    <input type="text" id="creative-discord" class="input" placeholder="Discord Username" oninput="updatePreview()">
+                    <textarea id="creative-bio" class="input" rows="2" placeholder="Bio" oninput="updatePreview()"></textarea>
+                </div>
+            </div>
 
-<div class="feature-row">
-<div>
-<p class="font-medium text-sm">Photo Gallery</p>
-<p class="text-xs text-gray-500">Image grid with lightbox</p>
-</div>
-<input type="checkbox" id="creative-gallery" class="toggle" onchange="toggleSection('gallery')" disabled>
-</div>
+            <!-- Music Settings -->
+            <div class="card p-6 mb-6">
+                <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-music text-cyan-400"></i>
+                    Music
+                </h3>
+                <div class="space-y-4">
+                    <input type="text" id="creative-song" class="input" placeholder="Song Name" oninput="updatePreview()">
+                    <input type="text" id="creative-artist" class="input" placeholder="Artist Name" oninput="updatePreview()">
+                    <input type="text" id="creative-music-url" class="input" placeholder="Music File URL (MP3)" oninput="updatePreview()">
+                    
+                    <div class="feature-row">
+                        <div>
+                            <p class="font-medium text-sm">Auto-play Music</p>
+                            <p class="text-xs text-gray-500">Start playing when page loads</p>
+                        </div>
+                        <input type="checkbox" id="creative-autoplay" class="toggle" onchange="updatePreview()">
+                    </div>
 
-<div class="feature-row">
-<div>
-<p class="font-medium text-sm">Blog Posts</p>
-<p class="text-xs text-gray-500">Share your thoughts</p>
-</div>
-<input type="checkbox" id="creative-blog" class="toggle" onchange="toggleSection('blog')" disabled>
-</div>
+                    <div class="feature-row">
+                        <div>
+                            <p class="font-medium text-sm">Visualizer</p>
+                            <p class="text-xs text-gray-500">Show audio visualizer bars</p>
+                        </div>
+                        <input type="checkbox" id="creative-visualizer" class="toggle" checked onchange="updatePreview()">
+                    </div>
+                </div>
+            </div>
 
-<div class="feature-row">
-<div>
-<p class="font-medium text-sm">Guestbook</p>
-<p class="text-xs text-gray-500">Visitor messages</p>
-</div>
-<input type="checkbox" id="creative-guestbook" class="toggle" onchange="toggleSection('guestbook')" disabled>
-</div>
-</div>
+            <!-- Animation Settings -->
+            <div class="card p-6 mb-6">
+                <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-wand-magic-sparkles text-cyan-400"></i>
+                    Animations
+                </h3>
+                <div class="space-y-3">
+                    <div class="feature-row">
+                        <div>
+                            <p class="font-medium text-sm">Page Load Animation</p>
+                            <p class="text-xs text-gray-500">Smooth fade-in on startup</p>
+                        </div>
+                        <input type="checkbox" id="creative-load-anim" class="toggle" checked onchange="updatePreview()">
+                    </div>
 
-<!-- Dynamic Sections -->
-<div id="section-projects" class="hidden space-y-3 mb-4">
-<p class="text-xs text-gray-500 mb-2">Add Projects (Max 3 for Free)</p>
-<div id="projects-list" class="space-y-2">
-<input type="text" class="input" placeholder="Project Title" oninput="updatePreview()">
-<input type="text" class="input" placeholder="Project URL" oninput="updatePreview()">
-</div>
-<button onclick="addProject()" class="btn btn-secondary w-full text-xs" id="add-project-btn">
-<i class="fas fa-plus"></i> Add Project
-</button>
-</div>
+                    <div class="feature-row">
+                        <div>
+                            <p class="font-medium text-sm">Hover Effects</p>
+                            <p class="text-xs text-gray-500">Interactive button states</p>
+                        </div>
+                        <input type="checkbox" id="creative-hover" class="toggle" checked onchange="updatePreview()">
+                    </div>
 
-<div id="section-gallery" class="hidden space-y-3 mb-4">
-<p class="text-xs text-gray-500 mb-2">Gallery Images (Max 6 for Free)</p>
-<div class="grid grid-cols-3 gap-2" id="gallery-preview">
-<div class="aspect-square rounded-lg bg-white/5 flex items-center justify-center text-gray-500">
-<i class="fas fa-plus"></i>
-</div>
-</div>
-<input type="text" class="input" placeholder="Image URL" oninput="addGalleryImage(this.value)">
-</div>
-</div>
+                    <div class="feature-row">
+                        <div>
+                            <p class="font-medium text-sm">Background Particles</p>
+                            <p class="text-xs text-gray-500">Floating dot animation</p>
+                        </div>
+                        <input type="checkbox" id="creative-particles" class="toggle" onchange="updatePreview()">
+                    </div>
 
-<!-- Social Links -->
-<div class="card p-6 mb-6">
-<h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
-<i class="fas fa-share-nodes text-cyan-400"></i>
-Social Links
-</h3>
-<div class="space-y-3" id="social-inputs">
-<input type="text" id="social-instagram" class="input" placeholder="Instagram @username" oninput="updatePreview()">
-<input type="text" id="social-twitter" class="input" placeholder="Twitter @username" oninput="updatePreview()">
-<input type="text" id="social-tiktok" class="input" placeholder="TikTok @username" oninput="updatePreview()">
-<input type="text" id="social-snapchat" class="input" placeholder="Snapchat username" oninput="updatePreview()">
-<input type="text" id="social-roblox" class="input" placeholder="Roblox username" oninput="updatePreview()">
-</div>
-<div id="extra-socials" class="hidden mt-3 space-y-3">
-<input type="text" class="input" placeholder="YouTube @username" oninput="updatePreview()">
-<input type="text" class="input" placeholder="Twitch us
-...
+                    <div class="feature-row">
+                        <div>
+                            <p class="font-medium text-sm">Glitch Text Effect</p>
+                            <p class="text-xs text-gray-500">Cyberpunk name animation</p>
+                            <span class="premium-badge mt-1 inline-flex"><i class="fas fa-crown text-xs"></i>Premium</span>
+                        </div>
+                        <input type="checkbox" id="creative-glitch" class="toggle" onchange="updatePreview()">
+                    </div>
+                </div>
+            </div>
 
-[Message clipped]  View entire message
+            <!-- Social Links -->
+            <div class="card p-6 mb-6">
+                <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-link text-cyan-400"></i>
+                    Social Links
+                </h3>
+                <div class="space-y-3">
+                    <input type="text" id="creative-instagram" class="input" placeholder="Instagram @username" oninput="updatePreview()">
+                    <input type="text" id="creative-twitter" class="input" placeholder="Twitter @username" oninput="updatePreview()">
+                    <input type="text" id="creative-tiktok" class="input" placeholder="TikTok @username" oninput="updatePreview()">
+                    <input type="text" id="creative-snapchat" class="input" placeholder="Snapchat username" oninput="updatePreview()">
+                    <input type="text" id="creative-roblox" class="input" placeholder="Roblox username" oninput="updatePreview()">
+                </div>
+            </div>
+
+            <!-- Export Options -->
+            <div class="card p-6 mb-6">
+                <h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-download text-cyan-400"></i>
+                    Export
+                </h3>
+                <div class="space-y-3">
+                    <button onclick="exportHTML()" class="w-full btn-primary">
+                        <i class="fas fa-file-code"></i>
+                        Export HTML File
+                    </button>
+                    <button onclick="showExportCode()" class="w-full btn btn-secondary">
+                        <i class="fas fa-code"></i>
+                        View Source Code
+                    </button>
+                </div>
+            </div>
+
+            <!-- Export Code Output -->
+            <div id="export-code-container" class="hidden mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold">Source Code</h3>
+                    <button onclick="copyExportCode()" class="btn btn-secondary !py-2 !px-4 text-xs">
+                        <i class="fas fa-copy"></i> Copy All
+                    </button>
+                </div>
+                <div class="code-block" id="export-code"></div>
+            </div>
+        </main>
+
+        <!-- Mini Player -->
+        <div class="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent z-50">
+            <div class="max-w-lg mx-auto">
+                <div class="card p-3 flex items-center gap-3">
+                    <button onclick="togglePlay()" class="w-10 h-10 rounded-full btn-primary !p-0">
+                        <i class="fas fa-pause text-sm" id="mini-play-icon"></i>
+                    </button>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium truncate">Get Throwed</p>
+                        <p class="text-xs text-gray-500 truncate">Bun B</p>
+                    </div>
+                    <div class="flex gap-0.5 h-4 items-end">
+                        <div class="w-0.5 bg-cyan-400/60 rounded-full" style="animation: viz 0.8s ease-in-out infinite; height: 60%"></div>
+                        <div class="w-0.5 bg-cyan-400/60 rounded-full" style="animation: viz 1s ease-in-out infinite 0.1s; height: 80%"></div>
+                        <div class="w-0.5 bg-cyan-400/60 rounded-full" style="animation: viz 0.9s ease-in-out infinite 0.2s; height: 40%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Audio -->
+    <audio id="bg-music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Global State
+        let currentTheme = 'cyber';
+        let isPlaying = false;
+        let isPremium = true; // Set to false for free users
+
+        // Initialize
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+                initMusic();
+                updatePreview();
+            }, 800);
+        });
+
+        // Music Setup
+        function initMusic() {
+            const music = document.getElementById('bg-music');
+            music.volume = 0.3;
+            music.play().catch(() => {});
+        }
+
+        function togglePlay() {
+            const music = document.getElementById('bg-music');
+            const icons = document.querySelectorAll('#music-play-icon, #main-play-icon, #mini-play-icon');
+            
+            isPlaying = !isPlaying;
+            
+            icons.forEach(icon => {
+                icon.className = isPlaying ? 'fas fa-pause' + (icon.id === 'main-play-icon' ? ' text-xl' : '') : 'fas fa-play' + (icon.id === 'main-play-icon' ? ' text-xl' : '');
+            });
+            
+            if (isPlaying) music.play();
+            else music.pause();
+        }
+
+        function prevSong() {
+            showToast('Previous track');
+        }
+
+        function nextSong() {
+            showToast('Next track');
+        }
+
+        function seek(e) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const pct = (x / rect.width) * 100;
+            document.getElementById('progress-bar').style.width = pct + '%';
+        }
+
+        // Navigation
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.classList.add('text-gray-500');
+            });
+            
+            const target = document.getElementById(pageName);
+            if (target) target.classList.add('active');
+            
+            const tab = document.querySelector(`[data-page="${pageName}"]`);
+            if (tab) {
+                tab.classList.add('active');
+                tab.classList.remove('text-gray-500');
+            }
+            
+            if (pageName === 'creative') updatePreview();
+        }
+
+        // Toast
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function copyDiscord() {
+            navigator.clipboard.writeText('sou1crush');
+            showToast('Copied to clipboard');
+        }
+
+        // Theme Selection
+        function selectTheme(theme) {
+            currentTheme = theme;
+            document.querySelectorAll('.theme-card').forEach(card => card.classList.remove('selected'));
+            document.getElementById(`theme-${theme}`).classList.add('selected');
+            updatePreview();
+        }
+
+        // Get Creative Settings
+        function getCreativeSettings() {
+            return {
+                username: document.getElementById('creative-username').value || 'username',
+                image: document.getElementById('creative-image').value || 'https://via.placeholder.com/150',
+                discord: document.getElementById('creative-discord').value || 'discord',
+                bio: document.getElementById('creative-bio').value || 'Welcome to my portfolio',
+                song: document.getElementById('creative-song').value || 'Get Throwed',
+                artist: document.getElementById('creative-artist').value || 'Bun B',
+                musicUrl: document.getElementById('creative-music-url').value || '',
+                autoplay: document.getElementById('creative-autoplay').checked,
+                visualizer: document.getElementById('creative-visualizer').checked,
+                loadAnim: document.getElementById('creative-load-anim').checked,
+                hoverEffects: document.getElementById('creative-hover').checked,
+                particles: document.getElementById('creative-particles').checked,
+                glitch: document.getElementById('creative-glitch').checked && isPremium,
+                instagram: document.getElementById('creative-instagram').value,
+                twitter: document.getElementById('creative-twitter').value,
+                tiktok: document.getElementById('creative-tiktok').value,
+                snapchat: document.getElementById('creative-snapchat').value,
+                roblox: document.getElementById('creative-roblox').value,
+                theme: currentTheme
+            };
+        }
+
+        // Generate Preview HTML
+        function generatePreviewHTML(settings) {
+            const themes = {
+                cyber: { bg: '#050505', accent: '#00d4ff', secondary: '#ff006e' },
+                midnight: { bg: '#0f172a', accent: '#60a5fa', secondary: '#a78bfa' },
+                sakura: { bg: '#2d1f2d', accent: '#f9a8d4', secondary: '#f472b6' }
+            };
+            
+            const t = themes[settings.theme];
+            
+            let socialsHtml = '';
+            if (settings.instagram) socialsHtml += `<a href="https://instagram.com/${settings.instagram.replace('@','')}" class="social-btn"><i class="fab fa-instagram"></i></a>`;
+            if (settings.twitter) socialsHtml += `<a href="https://twitter.com/${settings.twitter.replace('@','')}" class="social-btn"><i class="fab fa-twitter"></i></a>`;
+            if (settings.tiktok) socialsHtml += `<a href="https://tiktok.com/@${settings.tiktok.replace('@','')}" class="social-btn"><i class="fab fa-tiktok"></i></a>`;
+            if (settings.snapchat) socialsHtml += `<span class="social-btn" onclick="alert('Snapchat: ${settings.snapchat}')"><i class="fab fa-snapchat"></i></span>`;
+            if (settings.roblox) socialsHtml += `<span class="social-btn" onclick="alert('Roblox: ${settings.roblox}')"><i class="fas fa-gamepad"></i></span>`;
+
+            const vizHtml = settings.visualizer ? `
+                <div class="viz">
+                    <div class="vbar" style="animation-delay:0s"></div>
+                    <div class="vbar" style="animation-delay:0.1s"></div>
+                    <div class="vbar" style="animation-delay:0.2s"></div>
+                </div>
+            ` : '';
+
+            const particlesCss = settings.particles ? `
+                .particle { position: fixed; width: 2px; height: 2px; background: ${t.accent}; border-radius: 50%; pointer-events: none; animation: float 10s infinite; }
+                @keyframes float { 0%,100%{opacity:0}50%{opacity:1}100%{transform:translateY(-100vh)} }
+            ` : '';
+
+            const glitchCss = settings.glitch ? `
+                .glitch { position: relative; animation: glitch 3s infinite; }
+                .glitch::before,.glitch::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+                .glitch::before { left: 2px; text-shadow: -2px 0 red; clip: rect(24px,550px,90px,0); animation: glitch-anim 3s infinite linear alternate-reverse; }
+                @keyframes glitch-anim { 0%{clip:rect(10px,9999px,85px,0)}20%{clip:rect(63px,9999px,12px,0)}40%{clip:rect(23px,9999px,95px,0)}60%{clip:rect(85px,9999px,40px,0)}80%{clip:rect(35px,9999px,70px,0)}100%{clip:rect(90px,9999px,10px,0)} }
+                @keyframes glitch { 0%{transform:skew(0)}20%{transform:skew(-2deg)}40%{transform:skew(2deg)}100%{transform:skew(0)} }
+            ` : '';
+
+            const hoverCss = settings.hoverEffects ? `
+                .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+                .card:hover { border-color: rgba(255,255,255,0.2); }
+            ` : '';
+
+            const loadAnimCss = settings.loadAnim ? `
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+                body { animation: fadeIn 0.6s ease; }
+            ` : '';
+
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${settings.username}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: ${t.bg}; 
+            color: white; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px;
+            ${loadAnimCss ? '' : ''}
+        }
+        .card { 
+            background: rgba(255,255,255,0.05); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 24px; 
+            padding: 40px; 
+            max-width: 400px; 
+            width: 100%; 
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .profile-img { 
+            width: 120px; 
+            height: 120px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 3px solid ${t.accent}; 
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px ${t.accent}40;
+        }
+        h1 { 
+            font-size: 28px; 
+            margin-bottom: 8px; 
+            ${settings.glitch ? 'class="glitch" data-text="' + settings.username + '"' : ''}
+        }
+        .bio { color: rgba(255,255,255,0.6); margin-bottom: 24px; line-height: 1.6; }
+        .btn { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            width: 100%; 
+            padding: 14px; 
+            background: linear-gradient(135deg, ${t.accent}, ${t.secondary}); 
+            border: none; 
+            border-radius: 12px; 
+            color: ${t.bg}; 
+            font-weight: 600; 
+            cursor: pointer; 
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+        .socials { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
+        .social-btn { 
+            width: 44px; 
+            height: 44px; 
+            border-radius: 12px; 
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .social-btn:hover { background: ${t.accent}; color: ${t.bg}; }
+        .music { margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .viz { display: flex; justify-content: center; gap: 3px; height: 20px; margin-bottom: 12px; }
+        .vbar { width: 3px; background: ${t.accent}; border-radius: 2px; animation: viz 0.8s ease-in-out infinite; }
+        @keyframes viz { 0%,100%{height:20%}50%{height:100%} }
+        ${particlesCss}
+        ${glitchCss}
+        ${hoverCss}
+    </style>
+</head>
+<body>
+    ${settings.particles ? '<div class="particle" style="top:10%;left:20%;animation-delay:0s"></div><div class="particle" style="top:30%;left:80%;animation-delay:2s"></div><div class="particle" style="top:70%;left:50%;animation-delay:4s"></div>' : ''}
+    
+    <div class="card">
+        <img src="${settings.image}" alt="${settings.username}" class="profile-img">
+        <h1 ${settings.glitch ? 'class="glitch" data-text="' + settings.username + '"' : ''}>${settings.username}</h1>
+        <p class="bio">${settings.bio}</p>
+        
+        <button class="btn" onclick="navigator.clipboard.writeText('${settings.discord}'); alert('Copied!')">
+            <i class="fab fa-discord"></i> Add on Discord
+        </button>
+        
+        ${socialsHtml ? `<div class="socials">${socialsHtml}</div>` : ''}
+        
+        <div class="music">
+            ${settings.visualizer ? vizHtml : ''}
+            <p style="font-size: 12px; color: ${t.accent}; margin-bottom: 4px;">NOW PLAYING</p>
+            <p style="font-weight: 600;">${settings.song}</p>
+            <p style="font-size: 14px; color: rgba(255,255,255,0.5);">${settings.artist}</p>
+        </div>
+    </div>
+    
+    ${settings.musicUrl ? `<audio id="music" loop ${settings.autoplay ? 'autoplay' : ''}><source src="${settings.musicUrl}" type="audio/mpeg"></audio>` : ''}
+</body>
+</html>`;
+        }
+
+        // Update Preview
+        function updatePreview() {
+            const settings = getCreativeSettings();
+            const html = generatePreviewHTML(settings);
+            const frame = document.getElementById('preview-frame');
+            frame.srcdoc = html;
+        }
+
+        function refreshPreview() {
+            updatePreview();
+            showToast('Preview refreshed');
+        }
+
+        // Export Functions
+        function exportHTML() {
+            const settings = getCreativeSettings();
+            const html = generatePreviewHTML(settings);
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${settings.username}-portfolio.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('File downloaded!');
+        }
+
+        function showExportCode() {
+            const settings = getCreativeSettings();
+            const html = generatePreviewHTML(settings);
+            document.getElementById('export-code').textContent = html;
+            document.getElementById('export-code-container').classList.remove('hidden');
+        }
+
+        function copyExportCode() {
+            const code = document.getElementById('export-code').textContent;
+            navigator.clipboard.writeText(code);
+            showToast('Code copied to clipboard');
+        }
+
+        // Basic Generator
+        function generateBasic() {
+            const username = document.getElementById('basic-username').value || 'username';
+            const image = document.getElementById('basic-image').value || 'https://via.placeholder.com/150';
+            const discord = document.getElementById('basic-discord').value || 'discord';
+            const bio = document.getElementById('basic-bio').value || 'Welcome to my portfolio';
+
+            const html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${username}</title>
+    <style>
+        body { font-family: sans-serif; background: #0a0a0a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: #111; border-radius: 20px; padding: 40px; text-align: center; max-width: 400px; }
+        img { width: 120px; height: 120px; border-radius: 50%; margin-bottom: 20px; }
+        h1 { margin: 0 0 10px 0; }
+        p { color: #888; margin-bottom: 20px; }
+        button { background: #00d4ff; color: black; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img src="${image}" alt="${username}">
+        <h1>${username}</h1>
+        <p>${bio}</p>
+        <button onclick="navigator.clipboard.writeText('${discord}')">Add Discord</button>
+    </div>
+</body>
+</html>`;
+
+            document.getElementById('basic-code').textContent = html;
+            document.getElementById('basic-output').classList.remove('hidden');
+        }
+
+        function copyBasic() {
+            const code = document.getElementById('basic-code').textContent;
+            navigator.clipboard.writeText(code);
+            showToast('Code copied');
+        }
+
+        // Auto-update preview on input
+        document.querySelectorAll('#creative-username, #creative-image, #creative-discord, #creative-bio, #creative-song, #creative-artist, #creative-music-url, #creative-instagram, #creative-twitter, #creative-tiktok, #creative-snapchat, #creative-roblox').forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+
+        // Update progress bar
+        setInterval(() => {
+            const music = document.getElementById('bg-music');
+            if (!music.paused) {
+                const pct = (music.currentTime / music.duration) * 100;
+                document.getElementById('progress-bar').style.width = pct + '%';
+                const mins = Math.floor(music.currentTime / 60);
+                const secs = Math.floor(music.currentTime % 60);
+                document.getElementById('current-time').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
