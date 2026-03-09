@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>sou1crush | Portfolio Generator Pro</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+
+<!-- Stripe -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<style>
+:root {
+--primary: #0a0a0a;
+--surface: #111111;
+--surface-elevated: #1a1a1a;
+--accent: #00d4ff;
+--accent-secondary: #ff006e;
+--success: #00ff88;
+--warning: #ffd700;
+--text: #ffffff;
+--text-muted: #888888;
+--border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+-webkit-tap-highlight-color: transparent;
+}
+
+body {
+font-family: 'Inter', sans-serif;
+background: var(--primary);
+color: var(--text);
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+/* Background */
+.mesh-bg {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: -2;
+background:
+radial-gradient(at 0% 0%, rgba(0, 212, 255, 0.05) 0, transparent 50%),
+radial-gradient(at 100% 0%, rgba(255, 0, 110, 0.05) 0, transparent 50%),
+#050505;
+}
+
+.noise {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+opacity: 0.015;
+z-index: -1;
+pointer-events: none;
+background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Modern Components */
+.card {
+background: rgba(17, 17, 17, 0.8);
+backdrop-filter: blur(20px);
+border: 1px solid var(--border);
+border-radius: 16px;
+transition: all 0.3s ease;
+}
+
+.card:hover {
+border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Clean Buttons - No Spin */
+.btn {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+padding: 12px 24px;
+background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 12px;
+color: white;
+font-size: 14px;
+font-weight: 500;
+cursor: pointer;
+transition: all 0.2s ease;
+}
+
+.btn:hover {
+background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08));
+border-color: rgba(255, 255, 255, 0.2);
+transform: translateY(-1px);
+}
+
+.btn:active {
+transform: translateY(0) scale(0.98);
+}
+
+.btn-primary {
+background: linear-gradient(135deg, var(--accent), #0099cc);
+border-color: transparent;
+color: black;
+font-weight: 600;
+}
+
+.btn-primary:hover {
+background: linear-gradient(135deg, #33ddff, #00b3e6);
+box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+}
+
+.btn-secondary {
+background: transparent;
+border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-gold {
+background: linear-gradient(135deg, #ffd700, #ffaa00);
+border-color: transparent;
+color: black;
+font-weight: 600;
+}
+
+.btn-gold:hover {
+box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+}
+
+.btn:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+transform: none;
+}
+
+/* Inputs */
+.input {
+width: 100%;
+padding: 14px 16px;
+background: rgba(255, 255, 255, 0.03);
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 12px;
+color: white;
+font-size: 14px;
+transition: all 0.3s;
+}
+
+.input:focus {
+outline: none;
+border-color: var(--accent);
+background: rgba(255, 255, 255, 0.05);
+}
+
+.input::placeholder {
+color: rgba(255, 255, 255, 0.3);
+}
+
+/* Toggle */
+.toggle {
+appearance: none;
+width: 48px;
+height: 26px;
+background: rgba(255, 255, 255, 0.1);
+border-radius: 13px;
+position: relative;
+cursor: pointer;
+transition: all 0.3s;
+}
+
+.toggle::after {
+content: '';
+position: absolute;
+width: 20px;
+height: 20px;
+background: white;
+border-radius: 50%;
+top: 3px;
+left: 3px;
+transition: transform 0.3s;
+box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.toggle:checked {
+background: var(--accent);
+}
+
+.toggle:checked::after {
+transform: translateX(22px);
+}
+
+/* Tabs */
+.tab {
+position: relative;
+padding: 12px 16px;
+font-size: 13px;
+font-weight: 500;
+color: var(--text-muted);
+cursor: pointer;
+transition: all 0.3s;
+border: none;
+background: none;
+}
+
+.tab::after {
+content: '';
+position: absolute;
+bottom: 0;
+left: 50%;
+transform: translateX(-50%);
+width: 0;
+height: 2px;
+background: var(--accent);
+transition: width 0.3s;
+border-radius: 2px;
+}
+
+.tab.active {
+color: var(--accent);
+}
+
+.tab.active::after {
+width: 50%;
+}
+
+/* Pages */
+.page {
+display: none;
+animation: fadeIn 0.4s ease;
+}
+
+.page.active {
+display: block;
+}
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(10px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+/* Toast */
+.toast {
+position: fixed;
+bottom: 100px;
+left: 50%;
+transform: translateX(-50%) translateY(20px);
+background: rgba(0, 0, 0, 0.95);
+border: 1px solid rgba(255, 255, 255, 0.1);
+padding: 16px 28px;
+border-radius: 12px;
+font-size: 14px;
+opacity: 0;
+transition: all 0.3s ease;
+z-index: 10000;
+backdrop-filter: blur(10px);
+}
+
+.toast.show {
+opacity: 1;
+transform: translateX(-50%) translateY(0);
+}
+
+/* Modal */
+.modal-overlay {
+position: fixed;
+inset: 0;
+background: rgba(0, 0, 0, 0.8);
+backdrop-filter: blur(10px);
+z-index: 9999;
+display: none;
+align-items: center;
+justify-content: center;
+padding: 20px;
+}
+
+.modal-overlay.active {
+display: flex;
+}
+
+.modal {
+background: var(--surface);
+border: 1px solid var(--border);
+border-radius: 24px;
+width: 100%;
+max-width: 420px;
+max-height: 90vh;
+overflow-y: auto;
+animation: modalEnter 0.3s ease;
+}
+
+@keyframes modalEnter {
+from { opacity: 0; transform: scale(0.95); }
+to { opacity: 1; transform: scale(1); }
+}
+
+/* Premium Badge */
+.badge-premium {
+display: inline-flex;
+align-items: center;
+gap: 4px;
+padding: 4px 10px;
+background: linear-gradient(135deg, #ffd700, #ffaa00);
+color: black;
+font-size: 10px;
+font-weight: 700;
+border-radius: 20px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+.badge-pro {
+display: inline-flex;
+align-items: center;
+gap: 4px;
+padding: 4px 10px;
+background: linear-gradient(135deg, var(--accent), #0099cc);
+color: black;
+font-size: 10px;
+font-weight: 700;
+border-radius: 20px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+/* Chat */
+.chat-message {
+max-width: 80%;
+padding: 12px 16px;
+border-radius: 16px;
+margin-bottom: 8px;
+font-size: 14px;
+line-height: 1.5;
+}
+
+.chat-message.sent {
+background: var(--accent);
+color: black;
+margin-left: auto;
+border-bottom-right-radius: 4px;
+}
+
+.chat-message.received {
+background: rgba(255, 255, 255, 0.1);
+margin-right: auto;
+border-bottom-left-radius: 4px;
+}
+
+.chat-time {
+font-size: 11px;
+opacity: 0.6;
+margin-top: 4px;
+}
+
+/* Online Indicator */
+.online-indicator {
+width: 8px;
+height: 8px;
+background: var(--success);
+border-radius: 50%;
+box-shadow: 0 0 8px var(--success);
+}
+
+.online-indicator.offline {
+background: var(--text-muted);
+box-shadow: none;
+}
+
+/* Theme Cards */
+.theme-card {
+aspect-ratio: 16/10;
+border-radius: 12px;
+border: 2px solid transparent;
+cursor: pointer;
+transition: all 0.3s;
+position: relative;
+overflow: hidden;
+}
+
+.theme-card:hover {
+transform: translateY(-2px);
+}
+
+.theme-card.selected {
+border-color: var(--accent);
+}
+
+.theme-card.selected::after {
+content: '✓';
+position: absolute;
+top: 8px;
+right: 8px;
+width: 24px;
+height: 24px;
+background: var(--accent);
+color: black;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 14px;
+font-weight: bold;
+}
+
+/* Feature Row */
+.feature-row {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 16px;
+background: rgba(255, 255, 255, 0.02);
+border-radius: 12px;
+margin-bottom: 12px;
+border: 1px solid transparent;
+transition: all 0.3s;
+}
+
+.feature-row:hover {
+background: rgba(255, 255, 255, 0.04);
+border-color: rgba(255, 255, 255, 0.1);
+}
+
+.feature-row.locked {
+opacity: 0.5;
+}
+
+/* Code Block */
+.code-block {
+background: #0a0a0a;
+border: 1px solid var(--border);
+border-radius: 12px;
+padding: 16px;
+font-family: 'JetBrains Mono', monospace;
+font-size: 12px;
+line-height: 1.6;
+overflow-x: auto;
+max-height: 300px;
+overflow-y: auto;
+}
+
+/* Preview Frame */
+.preview-frame {
+width: 100%;
+height: 400px;
+border: 1px solid var(--border);
+border-radius: 16px;
+background: white;
+}
+
+/* Loading */
+.loader {
+position: fixed;
+inset: 0;
+background: #000;
+z-index: 100000;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+transition: opacity 0.5s;
+}
+
+.loader.hidden {
+opacity: 0;
+pointer-events: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+width: 6px;
+height: 6px;
+}
+::-webkit-scrollbar-track {
+background: transparent;
+}
+::-webkit-scrollbar-thumb {
+background: rgba(255, 255, 255, 0.1);
+border-radius: 3px;
+}
+
+/* Status Dot */
+.status-dot {
+width: 8px;
+height: 8px;
+background: var(--success);
+border-radius: 50%;
+box-shadow: 0 0 8px var(--success);
+}
+
+/* Watermark */
+.watermark {
+position: fixed;
+bottom: 80px;
+right: 20px;
+font-size: 12px;
+color: rgba(255, 255, 255, 0.3);
+pointer-events: none;
+}
+
+.watermark.hidden {
+display: none;
+}
+
+/* Analytics Card */
+.stat-card {
+background: rgba(255, 255, 255, 0.03);
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 12px;
+padding: 20px;
+text-align: center;
+}
+
+.stat-value {
+font-size: 32px;
+font-weight: 700;
+background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+}
+
+/* Visitor Counter */
+.visitor-counter {
+display: inline-flex;
+align-items: center;
+gap: 8px;
+padding: 8px 16px;
+background: rgba(0, 255, 136, 0.1);
+border: 1px solid rgba(0, 255, 136, 0.2);
+border-radius: 20px;
+font-size: 13px;
+color: var(--success);
+}
+
+/* Guestbook Entry */
+.guestbook-entry {
+background: rgba(255, 255, 255, 0.03);
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 12px;
+padding: 16px;
+margin-bottom: 12px;
+}
+
+/* Font Preview */
+.font-preview {
+padding: 12px;
+background: rgba(255, 255, 255, 0.03);
+border-radius: 8px;
+cursor: pointer;
+transition: all 0.3s;
+border: 2px solid transparent;
+}
+
+.font-preview:hover {
+background: rgba(255, 255, 255, 0.06);
+}
+
+.font-preview.selected {
+border-color: var(--accent);
+}
+
+/* Video Background Option */
+.video-option {
+aspect-ratio: 16/9;
+border-radius: 12px;
+overflow: hidden;
+position: relative;
+cursor: pointer;
+border: 2px solid transparent;
+transition: all 0.3s;
+}
+
+.video-option:hover {
+transform: scale(1.02);
+}
+
+.video-option.selected {
+border-color: var(--accent);
+}
+
+/* Project Card */
+.project-card {
+background: rgba(255, 255, 255, 0.03);
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 12px;
+overflow: hidden;
+transition: all 0.3s;
+}
+
+.project-card:hover {
+transform: translateY(-4px);
+border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Gallery Grid */
+.gallery-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 8px;
+}
+
+.gallery-item {
+aspect-ratio: 1;
+border-radius: 8px;
+overflow: hidden;
+cursor: pointer;
+transition: all 0.3s;
+}
+
+.gallery-item:hover {
+transform: scale(1.05);
+}
+
+/* Blog Post */
+.blog-post {
+background: rgba(255, 255, 255, 0.03);
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 12px;
+padding: 20px;
+margin-bottom: 16px;
+transition: all 0.3s;
+}
+
+.blog-post:hover {
+border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Custom URL Input */
+.url-input-group {
+display: flex;
+align-items: center;
+background: rgba(255, 255, 255, 0.03);
+border: 1px solid rgba(255, 255, 255, 0.1);
+border-radius: 12px;
+overflow: hidden;
+}
+
+.url-input-group .prefix {
+padding: 14px 16px;
+color: var(--text-muted);
+font-size: 14px;
+border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.url-input-group input {
+flex: 1;
+border: none;
+background: transparent;
+}
+
+/* Locked Feature Overlay */
+.locked-overlay {
+position: absolute;
+inset: 0;
+background: rgba(0, 0, 0, 0.7);
+display: flex;
+align-items: center;
+justify-content: center;
+border-radius: inherit;
+}
+
+/* Selection */
+::selection {
+background: var(--accent);
+color: black;
+}
+</style>
+</head>
+<body>
+
+<!-- Loader -->
+<div class="loader" id="loader">
+<div class="w-12 h-12 border-2 border-white/10 border-t-cyan-400 rounded-full mb-4" style="animation: spin 1s linear infinite;"></div>
+<div class="text-sm text-gray-500 tracking-widest">INITIALIZING</div>
+</div>
+
+<!-- Background -->
+<div class="mesh-bg"></div>
+<div class="noise"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast">Message</div>
+
+<!-- Watermark (Free Users) -->
+<div class="watermark" id="watermark">Made with sou1crush</div>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="auth-modal">
+<div class="modal">
+<div class="p-6 border-b border-white/10">
+<div class="flex items-center justify-between">
+<h2 class="text-xl font-bold" id="auth-title">Sign In</h2>
+<button onclick="closeModal('auth-modal')" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-white">
+<i class="fas fa-times"></i>
+</button>
+</div>
+</div>
+<div class="p-6">
+<form id="auth-form" onsubmit="handleAuth(event)">
+<div class="space-y-4">
+<div>
+<label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Email</label>
+<input type="email" id="auth-email" class="input" placeholder="you@example.com" required>
+</div>
+<div>
+<label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Password</label>
+<input type="password" id="auth-password" class="input" placeholder="••••••••" required>
+</div>
+<div id="auth-username-field" class="hidden">
+<label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Username</label>
+<input type="text" id="auth-username" class="input" placeholder="Choose a username">
+</div>
+</div>
+<button type="submit" class="w-full btn-primary mt-6" id="auth-submit">
+Sign In
+</button>
+</form>
+<div class="mt-4 text-center">
+<button onclick="toggleAuthMode()" class="text-sm text-cyan-400 hover:underline" id="auth-toggle">
+Don't have an account? Sign up
+</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal-overlay" id="payment-modal">
+<div class="modal">
+<div class="p-6 border-b border-white/10">
+<div class="flex items-center justify-between">
+<h2 class="text-xl font-bold flex items-center gap-2">
+<i class="fas fa-crown text-yellow-400"></i>
+Upgrade to Pro
+</h2>
+<button onclick="closeModal('payment-modal')" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-white">
+<i class="fas fa-times"></i>
+</button>
+</div>
+</div>
+<div class="p-6">
+<div class="text-center mb-6">
+<div class="text-4xl font-bold mb-2">$9.99<span class="text-lg text-gray-500 font-normal">/month</span></div>
+<p class="text-sm text-gray-500">Unlock all premium features</p>
+</div>
+
+<div class="space-y-3 mb-6">
+<div class="flex items-center gap-3 text-sm">
+<i class="fas fa-check text-green-400"></i>
+<span>Advanced animated themes</span>
+</div>
+<div class="flex items-center gap-3 text-sm">
+<i class="fas fa-check text-green-400"></i>
+<span>Custom fonts & video backgrounds</span>
+</div>
+<div class="flex items-center gap-3 text-sm">
+<i class="fas fa-check text-green-400"></i>
+<span>Analytics & visitor counter</span>
+</div>
+<div class="flex items-center gap-3 text-sm">
+<i class="fas fa-check text-green-400"></i>
+<span>Remove watermark</span>
+</div>
+<div class="flex items-center gap-3 text-sm">
+<i class="fas fa-check text-green-400"></i>
+<span>Custom profile URL</span>
+</div>
+<div class="flex items-center gap-3 text-sm">
+<i class="fas fa-check text-green-400"></i>
+<span>Unlimited social links</span>
+</div>
+<div class="flex items-center gap-3 text-sm">
+<i class="fas fa-check text-green-400"></i>
+<span>Projects, gallery & blog sections</span>
+</div>
+<div class="flex items-center gap-3 text-sm">
+<i class="fas fa-check text-green-400"></i>
+<span>Guestbook & messaging</span>
+</div>
+</div>
+
+<div id="payment-form">
+<div class="space-y-4">
+<div>
+<label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Card Number</label>
+<div class="input flex items-center gap-3">
+<i class="fas fa-credit-card text-gray-500"></i>
+<input type="text" id="card-number" placeholder="4242 4242 4242 4242" class="bg-transparent border-none outline-none flex-1 text-white">
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Expiry</label>
+<input type="text" id="card-expiry" placeholder="MM/YY" class="input">
+</div>
+<div>
+<label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">CVC</label>
+<input type="text" id="card-cvc" placeholder="123" class="input">
+</div>
+</div>
+</div>
+<button onclick="processPayment()" class="w-full btn-gold mt-6" id="pay-button">
+<i class="fas fa-lock"></i>
+Pay $9.99
+</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Main App -->
+<div class="max-w-lg mx-auto min-h-screen flex flex-col" id="app">
+
+<!-- Header -->
+<header class="p-6 pt-12">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img src="https://i.pinimg.com/736x/38/08/9a/38089ade5d66e5e20c8fad9bf539b5ab.jpg"
+alt="Profile"
+id="header-avatar"
+class="w-10 h-10 rounded-full object-cover border border-white/20">
+<div class="absolute -bottom-1 -right-1 w-4 h-4 bg-black rounded-full flex items-center justify-center">
+<div class="status-dot" id="header-status"></div>
+</div>
+</div>
+<div>
+<h1 class="font-bold text-lg" id="header-username">sou1crush</h1>
+<div class="flex items-center gap-2" id="header-badges">
+<span class="badge-pro">Free</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button onclick="showPage('messages')" class="relative w-10 h-10 btn !p-0">
+<i class="fas fa-envelope"></i>
+<span id="message-badge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center hidden">0</span>
+</button>
+<button onclick="toggleAuth()" class="w-10 h-10 btn !p-0" id="auth-button">
+<i class="fas fa-user"></i>
+</button>
+</div>
+</div>
+
+<!-- Navigation -->
+<nav class="flex justify-between border-b border-white/10">
+<button onclick="showPage('home')" class="tab active" data-page="home">Home</button>
+<button onclick="showPage('creative')" class="tab" data-page="creative">Create</button>
+<button onclick="showPage('analytics')" class="tab" data-page="analytics">Stats</button>
+<button onclick="showPage('messages')" class="tab" data-page="messages">Inbox</button>
+<button onclick="showPage('profile')" class="tab" data-page="profile">Profile</button>
+</nav>
+</header>
+
+<!-- HOME PAGE -->
+<main id="home" class="page active px-6 pb-32 flex-1">
+<!-- Quick Stats -->
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="stat-card">
+<div class="stat-value" id="stat-views">0</div>
+<div class="text-xs text-gray-500 mt-1">Page Views</div>
+</div>
+<div class="stat-card">
+<div class="stat-value" id="stat-clicks">0</div>
+<div class="text-xs text-gray-500 mt-1">Link Clicks</div>
+</div>
+</div>
+
+<!-- Visitor Counter -->
+<div class="flex justify-center mb-6">
+<div class="visitor-counter">
+<i class="fas fa-users"></i>
+<span id="visitor-count">1,234 visitors today</span>
+</div>
+</div>
+
+<!-- Actions -->
+<div class="space-y-3 mb-6">
+<button onclick="showPage('creative')" class="w-full btn-primary">
+<i class="fas fa-magic"></i>
+Create Portfolio
+</button>
+
+<button onclick="openPayment()" class="w-full btn-gold" id="upgrade-btn">
+<i class="fas fa-crown"></i>
+Upgrade to Pro
+</button>
+</div>
+
+<!-- Recent Activity -->
+<div class="card p-6">
+<h3 class="font-semibold mb-4 flex items-center gap-2">
+<i class="fas fa-chart-line text-cyan-400"></i>
+Recent Activity
+</h3>
+<div id="activity-list" class="space-y-3">
+<div class="text-sm text-gray-500 text-center py-4">No recent activity</div>
+</div>
+</div>
+</main>
+
+<!-- CREATIVE PAGE -->
+<main id="creative" class="page px-6 pb-32 flex-1">
+<div class="flex items-center justify-between mb-2">
+<h2 class="text-xl font-bold">Creative Studio</h2>
+<span class="badge-pro" id="creative-badge">Free</span>
+</div>
+<p class="text-gray-500 text-sm mb-6">Build your perfect portfolio</p>
+
+<!-- Live Preview -->
+<div class="mb-6">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-sm font-semibold text-cyan-400">Live Preview</h3>
+<div class="flex gap-2">
+<button onclick="refreshPreview()" class="btn btn-secondary !py-2 !px-3 text-xs">
+<i class="fas fa-sync-alt"></i>
+</button>
+<button onclick="togglePreviewSize()" class="btn btn-secondary !py-2 !px-3 text-xs">
+<i class="fas fa-expand"></i>
+</button>
+</div>
+</div>
+<iframe id="preview-frame" class="preview-frame"></iframe>
+</div>
+
+<!-- Theme Selection -->
+<div class="card p-6 mb-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm font-semibold flex items-center gap-2">
+<i class="fas fa-palette text-cyan-400"></i>
+Theme
+</h3>
+<span class="badge-premium">Pro</span>
+</div>
+<div class="grid grid-cols-3 gap-3" id="theme-grid">
+<!-- Basic Themes (Free) -->
+<div class="theme-card selected" onclick="selectTheme('cyber')" id="theme-cyber" style="background: linear-gradient(135deg, #0a0a0a, #111);">
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-xs font-medium">Cyber</span>
+</div>
+</div>
+<div class="theme-card" onclick="selectTheme('minimal')" id="theme-minimal" style="background: linear-gradient(135deg, #1a1a1a, #2a2a2a);">
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-xs font-medium">Minimal</span>
+</div>
+</div>
+<!-- Premium Themes (Locked) -->
+<div class="theme-card relative" onclick="selectTheme('neon')" id="theme-neon" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);">
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-xs font-medium">Neon</span>
+</div>
+<div class="locked-overlay" id="lock-neon">
+<i class="fas fa-lock text-white/50"></i>
+</div>
+</div>
+<div class="theme-card relative" onclick="selectTheme('aurora')" id="theme-aurora" style="background: linear-gradient(135deg, #1a1f3c, #2d1b4e, #1a1f3c);">
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-xs font-medium">Aurora</span>
+</div>
+<div class="locked-overlay" id="lock-aurora">
+<i class="fas fa-lock text-white/50"></i>
+</div>
+</div>
+<div class="theme-card relative" onclick="selectTheme('gold')" id="theme-gold" style="background: linear-gradient(135deg, #1a1500, #2a2000, #1a1500);">
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-xs font-medium">Gold</span>
+</div>
+<div class="locked-overlay" id="lock-gold">
+<i class="fas fa-lock text-white/50"></i>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Custom Fonts -->
+<div class="card p-6 mb-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm font-semibold flex items-center gap-2">
+<i class="fas fa-font text-cyan-400"></i>
+Custom Fonts
+</h3>
+<span class="badge-premium">Pro</span>
+</div>
+<div class="grid grid-cols-2 gap-3" id="font-grid">
+<div class="font-preview selected" onclick="selectFont('inter')" id="font-inter">
+<div class="text-lg mb-1" style="font-family: 'Inter', sans-serif;">Aa</div>
+<div class="text-xs text-gray-500">Inter</div>
+</div>
+<div class="font-preview" onclick="selectFont('space')" id="font-space" style="font-family: 'Space Grotesk', sans-serif;">
+<div class="text-lg mb-1">Aa</div>
+<div class="text-xs text-gray-500">Space</div>
+<div class="locked-overlay" id="lock-font-space">
+<i class="fas fa-lock text-white/50 text-xs"></i>
+</div>
+</div>
+<div class="font-preview" onclick="selectFont('outfit')" id="font-outfit" style="font-family: 'Outfit', sans-serif;">
+<div class="text-lg mb-1">Aa</div>
+<div class="text-xs text-gray-500">Outfit</div>
+<div class="locked-overlay" id="lock-font-outfit">
+<i class="fas fa-lock text-white/50 text-xs"></i>
+</div>
+</div>
+<div class="font-preview" onclick="selectFont('mono')" id="font-mono" style="font-family: 'JetBrains Mono', monospace;">
+<div class="text-lg mb-1">Aa</div>
+<div class="text-xs text-gray-500">Mono</div>
+<div class="locked-overlay" id="lock-font-mono">
+<i class="fas fa-lock text-white/50 text-xs"></i>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Video Background -->
+<div class="card p-6 mb-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm font-semibold flex items-center gap-2">
+<i class="fas fa-video text-cyan-400"></i>
+Video Background
+</h3>
+<span class="badge-premium">Pro</span>
+</div>
+<div class="grid grid-cols-2 gap-3 mb-4" id="video-grid">
+<div class="video-option selected" onclick="selectVideo('none')" id="video-none" style="background: #111;">
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-xs">None</span>
+</div>
+</div>
+<div class="video-option relative" onclick="selectVideo('rain')" id="video-rain">
+<div class="absolute inset-0 bg-gradient-to-br from-blue-900/50 to-purple-900/50"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-xs">Rain</span>
+</div>
+<div class="locked-overlay" id="lock-video-rain">
+<i class="fas fa-lock text-white/50"></i>
+</div>
+</div>
+<div class="video-option relative" onclick="selectVideo('space')" id="video-space">
+<div class="absolute inset-0 bg-gradient-to-br from-indigo-900/50 to-black"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-xs">Space</span>
+</div>
+<div class="locked-overlay" id="lock-video-space">
+<i class="fas fa-lock text-white/50"></i>
+</div>
+</div>
+<div class="video-option relative" onclick="selectVideo('city')" id="video-city">
+<div class="absolute inset-0 bg-gradient-to-br from-pink-900/50 to-orange-900/50"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-xs">City</span>
+</div>
+<div class="locked-overlay" id="lock-video-city">
+<i class="fas fa-lock text-white/50"></i>
+</div>
+</div>
+</div>
+<input type="text" id="custom-video-url" class="input" placeholder="Or enter custom video URL..." oninput="updatePreview()">
+</div>
+
+<!-- Profile Settings -->
+<div class="card p-6 mb-6">
+<h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+<i class="fas fa-user text-cyan-400"></i>
+Profile
+</h3>
+<div class="space-y-4">
+<input type="text" id="creative-username" class="input" placeholder="Username" oninput="updatePreview()">
+<input type="text" id="creative-image" class="input" placeholder="Profile Image URL" oninput="updatePreview()">
+<input type="text" id="creative-banner" class="input" placeholder="Banner Image URL (Pro)" oninput="updatePreview()">
+<input type="text" id="creative-discord" class="input" placeholder="Discord Username" oninput="updatePreview()">
+<textarea id="creative-bio" class="input" rows="2" placeholder="Bio" oninput="updatePreview()"></textarea>
+</div>
+</div>
+
+<!-- Custom URL -->
+<div class="card p-6 mb-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm font-semibold flex items-center gap-2">
+<i class="fas fa-link text-cyan-400"></i>
+Custom URL
+</h3>
+<span class="badge-premium">Pro</span>
+</div>
+<div class="url-input-group">
+<span class="prefix">sou1crush.io/</span>
+<input type="text" id="custom-url" class="input !border-none" placeholder="yourname" oninput="checkUrlAvailability()">
+</div>
+<p class="text-xs text-gray-500 mt-2" id="url-status">Enter your custom URL</p>
+</div>
+
+<!-- Music Settings -->
+<div class="card p-6 mb-6">
+<h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+<i class="fas fa-music text-cyan-400"></i>
+Music Player
+</h3>
+<div class="space-y-4">
+<input type="text" id="creative-song" class="input" placeholder="Song Name" oninput="updatePreview()">
+<input type="text" id="creative-artist" class="input" placeholder="Artist Name" oninput="updatePreview()">
+<input type="text" id="creative-music-url" class="input" placeholder="Music File URL (MP3)" oninput="updatePreview()">
+
+<div class="feature-row">
+<div>
+<p class="font-medium text-sm">Auto-play Music</p>
+<p class="text-xs text-gray-500">Start playing when page loads</p>
+</div>
+<input type="checkbox" id="creative-autoplay" class="toggle" onchange="updatePreview()">
+</div>
+
+<div class="feature-row">
+<div>
+<p class="font-medium text-sm">Visualizer</p>
+<p class="text-xs text-gray-500">Show audio visualizer bars</p>
+</div>
+<input type="checkbox" id="creative-visualizer" class="toggle" checked onchange="updatePreview()">
+</div>
+
+<div class="feature-row">
+<div>
+<p class="font-medium text-sm">Full Music Player</p>
+<p class="text-xs text-gray-500">Pro-style player with controls</p>
+<span class="badge-premium mt-1 inline-flex">Pro</span>
+</div>
+<input type="checkbox" id="creative-full-player" class="toggle" onchange="updatePreview()" disabled>
+</div>
+</div>
+</div>
+
+<!-- Animation Settings -->
+<div class="card p-6 mb-6">
+<h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+<i class="fas fa-wand-magic-sparkles text-cyan-400"></i>
+Animations
+</h3>
+<div class="space-y-3">
+<div class="feature-row">
+<div>
+<p class="font-medium text-sm">Page Load Animation</p>
+<p class="text-xs text-gray-500">Smooth fade-in on startup</p>
+</div>
+<input type="checkbox" id="creative-load-anim" class="toggle" checked onchange="updatePreview()">
+</div>
+
+<div class="feature-row">
+<div>
+<p class="font-medium text-sm">Hover Effects</p>
+<p class="text-xs text-gray-500">Interactive button states</p>
+</div>
+<input type="checkbox" id="creative-hover" class="toggle" checked onchange="updatePreview()">
+</div>
+
+<div class="feature-row">
+<div>
+<p class="font-medium text-sm">Background Particles</p>
+<p class="text-xs text-gray-500">Floating dot animation</p>
+</div>
+<input type="checkbox" id="creative-particles" class="toggle" onchange="updatePreview()">
+</div>
+
+<div class="feature-row">
+<div>
+<p class="font-medium text-sm">Glitch Text Effect</p>
+<p class="text-xs text-gray-500">Cyberpunk name animation</p>
+<span class="badge-premium mt-1 inline-flex">Pro</span>
+</div>
+<input type="checkbox" id="creative-glitch" class="toggle" onchange="updatePreview()" disabled>
+</div>
+
+<div class="feature-row">
+<div>
+<p class="font-medium text-sm">3D Tilt Cards</p>
+<p class="text-xs text-gray-500">Mouse-following 3D effect</p>
+<span class="badge-premium mt-1 inline-flex">Pro</span>
+</div>
+<input type="checkbox" id="creative-tilt" class="toggle" onchange="updatePreview()" disabled>
+</div>
+</div>
+</div>
+
+<!-- Extra Sections -->
+<div class="card p-6 mb-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm font-semibold flex items-center gap-2">
+<i class="fas fa-layer-group text-cyan-400"></i>
+Extra Sections
+</h3>
+<span class="badge-premium">Pro</span>
+</div>
+
+<div class="space-y-3 mb-4">
+<div class="feature-row">
+<div>
+<p class="font-medium text-sm">Projects Showcase</p>
+<p class="text-xs text-gray-500">Display your work</p>
+</div>
+<input type="checkbox" id="creative-projects" class="toggle" onchange="toggleSection('projects')" disabled>
+</div>
+
+<div class="feature-row">
+<div>
+<p class="font-medium text-sm">Photo Gallery</p>
+<p class="text-xs text-gray-500">Image grid with lightbox</p>
+</div>
+<input type="checkbox" id="creative-gallery" class="toggle" onchange="toggleSection('gallery')" disabled>
+</div>
+
+<div class="feature-row">
+<div>
+<p class="font-medium text-sm">Blog Posts</p>
+<p class="text-xs text-gray-500">Share your thoughts</p>
+</div>
+<input type="checkbox" id="creative-blog" class="toggle" onchange="toggleSection('blog')" disabled>
+</div>
+
+<div class="feature-row">
+<div>
+<p class="font-medium text-sm">Guestbook</p>
+<p class="text-xs text-gray-500">Visitor messages</p>
+</div>
+<input type="checkbox" id="creative-guestbook" class="toggle" onchange="toggleSection('guestbook')" disabled>
+</div>
+</div>
+
+<!-- Dynamic Sections -->
+<div id="section-projects" class="hidden space-y-3 mb-4">
+<p class="text-xs text-gray-500 mb-2">Add Projects (Max 3 for Free)</p>
+<div id="projects-list" class="space-y-2">
+<input type="text" class="input" placeholder="Project Title" oninput="updatePreview()">
+<input type="text" class="input" placeholder="Project URL" oninput="updatePreview()">
+</div>
+<button onclick="addProject()" class="btn btn-secondary w-full text-xs" id="add-project-btn">
+<i class="fas fa-plus"></i> Add Project
+</button>
+</div>
+
+<div id="section-gallery" class="hidden space-y-3 mb-4">
+<p class="text-xs text-gray-500 mb-2">Gallery Images (Max 6 for Free)</p>
+<div class="grid grid-cols-3 gap-2" id="gallery-preview">
+<div class="aspect-square rounded-lg bg-white/5 flex items-center justify-center text-gray-500">
+<i class="fas fa-plus"></i>
+</div>
+</div>
+<input type="text" class="input" placeholder="Image URL" oninput="addGalleryImage(this.value)">
+</div>
+</div>
+
+<!-- Social Links -->
+<div class="card p-6 mb-6">
+<h3 class="text-sm font-semibold mb-4 flex items-center gap-2">
+<i class="fas fa-share-nodes text-cyan-400"></i>
+Social Links
+</h3>
+<div class="space-y-3" id="social-inputs">
+<input type="text" id="social-instagram" class="input" placeholder="Instagram @username" oninput="updatePreview()">
+<input type="text" id="social-twitter" class="input" placeholder="Twitter @username" oninput="updatePreview()">
+<input type="text" id="social-tiktok" class="input" placeholder="TikTok @username" oninput="updatePreview()">
+<input type="text" id="social-snapchat" class="input" placeholder="Snapchat username" oninput="updatePreview()">
+<input type="text" id="social-roblox" class="input" placeholder="Roblox username" oninput="updatePreview()">
+</div>
+<div id="extra-socials" class="hidden mt-3 space-y-3">
+<input type="text" class="input" placeholder="YouTube @username" oninput="updatePreview()">
+<input type="text" class="input" placeholder="Twitch us
+...
+
+[Message clipped]  View entire message
